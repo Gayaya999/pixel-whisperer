@@ -138,10 +138,12 @@
   }
 
   .label {
+    position: absolute;
+    top: clamp(88px, 12vh, 136px);
+    left: 0; right: 0;
     font-weight: 700;
     font-size: clamp(18px, 2vw, 26px);
     letter-spacing: .01em;
-    margin-bottom: clamp(34px, 7vh, 72px);
     opacity: 0;
     animation: fadeUp 1.1s .2s cubic-bezier(.2,.7,.2,1) forwards;
   }
@@ -251,7 +253,9 @@
 
   /* ---------- 引导进入按钮 ---------- */
   .actions {
-    margin-top: clamp(40px, 8vh, 78px);
+    position: absolute;
+    bottom: clamp(36px, 6vh, 64px);
+    left: 0; right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1229,6 +1233,56 @@
 
   @media(max-width:680px){ .p8-top{flex-direction:column; align-items:flex-start;} .p8-top-actions{width:100%; justify-content:flex-start;} }
 
+  /* ========== Studio 加载过渡层 ========== */
+  #studioLoading {
+    position: fixed; inset: 0; z-index: 25;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 36px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .6s cubic-bezier(.2,.7,.2,1);
+  }
+  #studioLoading.visible { opacity: 1; pointer-events: auto; }
+
+  .sl-ring {
+    position: relative; width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle,
+      transparent 0%, transparent 36%,
+      rgba(140,60,0,.35) 39%, rgba(215,100,0,.85) 42%,
+      rgba(255,145,5,1) 44.5%, rgba(255,175,40,1) 46%,
+      rgba(255,145,5,1) 47.5%, rgba(235,110,0,.85) 50%,
+      rgba(185,80,0,.52) 55%, rgba(120,50,0,.24) 63%,
+      rgba(70,28,0,.09) 73%, transparent 84%);
+    animation: pulseBreath 3s ease-in-out infinite;
+  }
+  .sl-ring::after {
+    content: ""; position: absolute; inset: 17%; border-radius: 50%;
+    background: radial-gradient(circle, #060c1e 50%, #070d24 100%);
+    box-shadow: inset 0 0 16px rgba(0,0,0,.98);
+  }
+
+  .sl-body { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+  .sl-step {
+    font-family: "PingFang SC", "Hiragino Sans GB", inherit;
+    font-size: clamp(14px, 1.3vw, 17px); font-weight: 300; letter-spacing: .12em;
+    color: #fff; text-align: center; min-height: 1.4em;
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .sl-step.swap { opacity: 0; transform: translateY(7px); }
+
+  .sl-dots i { font-style: normal; opacity: 0; animation: p5dot 1.4s infinite; }
+  .sl-dots i:nth-child(2) { animation-delay: .22s; }
+  .sl-dots i:nth-child(3) { animation-delay: .44s; }
+
+  .sl-bar { width: clamp(220px, 32vw, 340px); height: 3px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .sl-fill {
+    height: 100%; width: 0; border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255,145,10,.6), var(--accent-orange));
+    box-shadow: 0 0 14px rgba(255,138,30,.6);
+    transition: width .8s cubic-bezier(.4,.1,.2,1);
+  }
+  .sl-sub { font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: rgba(128,147,176,.55); }
+
     /* ========== 第九页：Evolve ========== */
   #page9 {
     position: fixed; inset: 0; z-index: 10; opacity: 0; pointer-events: none;
@@ -1787,6 +1841,16 @@
         <button class="p7-studio-btn" id="p7Studio">进入创作 Studio →</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Studio 加载过渡层 -->
+  <div id="studioLoading">
+    <div class="sl-ring"></div>
+    <div class="sl-body">
+      <p class="sl-step" id="slStep">正在解析你的创作风格<span class="sl-dots"><i>.</i><i>.</i><i>.</i></span></p>
+      <div class="sl-bar"><div class="sl-fill" id="slFill"></div></div>
+      <p class="sl-sub" id="slSub">STUDIO · INITIALIZING</p>
     </div>
   </div>
 
@@ -2521,9 +2585,9 @@
 
   </main>
 
-  <button class="sound-toggle hint" id="soundToggle" aria-label="环境音 Ambient" title="环境音 · Ambient">
+  <button class="sound-toggle hint" id="soundToggle" aria-label="下雨声 Rain" title="下雨声 · Rain">
     <span class="sound-bars"><i></i><i></i><i></i><i></i></span>
-    <span class="sound-label" id="soundLabel">声音 · 关</span>
+    <span class="sound-label" id="soundLabel">雨声 · 关</span>
   </button>
 
 <script>
@@ -3011,6 +3075,7 @@
 
   /* ========== 第七页：选题 ========== */
   const TOPICS = [
+    { title:'人最大的内耗，是把运气误认为实力', viewpoint:'一次对的时机被你当成了天赋，此后每一次跌落都会比别人更难接受。分清运气与实力，才是真正的自我认知。', source:'热点话题', heat:96 },
     { title:'"好女人等待被选择，坏女人主动制定规则"', viewpoint:'等待被选择不是温柔，是把自己活成货架上的商品；主动定规则，才是真正的自由。', source:'选题库', heat:92 },
     { title:'"懂事"是最毒的夸奖——好女孩的隐形枷锁', viewpoint:'被夸"懂事"的女孩，本质是提前学会了用讨好换安全感，代价是活成别人的需求清单。', source:'热点话题', heat:88 },
     { title:'女人最该升级的认知，是承认自己贪', viewpoint:'所谓格局大，不过是你终于不骂自己想赢。', source:'选题库', heat:85 },
@@ -3145,9 +3210,60 @@
     if (p8TopicText) p8TopicText.textContent = topicTitle;
     const p8Sub = document.getElementById('p8TopicSub');
     if (p8Sub) p8Sub.textContent = topicTitle;
-    if (p9LogTitle)  p9LogTitle.textContent  = topicTitle;
+    if (p9LogTitle) p9LogTitle.textContent = topicTitle;
+
+    const STEPS = [
+      '正在解析你的创作风格',
+      '加载选题参考素材',
+      '校准内容人格参数',
+      '初始化写作工作台',
+      'Agent 已就位，创作开始',
+    ];
+    const TOTAL = 15000;
+    const slEl   = document.getElementById('studioLoading');
+    const slStep = document.getElementById('slStep');
+    const slFill = document.getElementById('slFill');
+    const slSub  = document.getElementById('slSub');
+    const dots   = '<span class="sl-dots"><i>.</i><i>.</i><i>.</i></span>';
+
+    function setStep(idx) {
+      slStep.classList.add('swap');
+      setTimeout(() => {
+        slStep.innerHTML = STEPS[idx] + (idx < STEPS.length - 1 ? dots : '');
+        slStep.classList.remove('swap');
+      }, 420);
+    }
+
     page7.classList.remove('visible');
-    setTimeout(() => { page8.classList.add('visible'); }, 300);
+    setTimeout(() => {
+      slEl.classList.add('visible');
+      slFill.style.width = '0%';
+      slStep.innerHTML = STEPS[0] + dots;
+
+      const stepInterval = TOTAL / STEPS.length;
+      STEPS.forEach((_, i) => {
+        if (i === 0) return;
+        setTimeout(() => setStep(i), stepInterval * i);
+      });
+
+      const tickMs = 80;
+      let elapsed = 0;
+      const ticker = setInterval(() => {
+        elapsed += tickMs;
+        const pct = Math.min((elapsed / TOTAL) * 100, 98);
+        slFill.style.width = pct + '%';
+        if (elapsed >= TOTAL) clearInterval(ticker);
+      }, tickMs);
+
+      setTimeout(() => {
+        clearInterval(ticker);
+        slFill.style.width = '100%';
+        setTimeout(() => {
+          slEl.classList.remove('visible');
+          setTimeout(() => { page8.classList.add('visible'); }, 600);
+        }, 400);
+      }, TOTAL);
+    }, 300);
   }
 
   function goToPage9() {
@@ -3454,47 +3570,64 @@
   // 初始化选题列表（确保卡片在任何入口都存在）
   if (p7TopicList) buildTopics();
 
-  // ===== 引导页环境音（白噪音 · Web Audio 实时生成，无需音频文件）=====
+  // ===== 引导页环境音（下雨声 · Web Audio 实时生成，无需音频文件）=====
   (function ambientSound() {
     const toggle = document.getElementById('soundToggle');
     const label  = document.getElementById('soundLabel');
     if (!toggle) return;
 
     let ctx = null, master = null, ambientOn = false;
-    const VOL = 0.06;
+    const VOL = 0.09;
 
     function build() {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
       ctx = new AC();
-      // 2.5s 循环噪音缓冲：白噪音积分为柔和的"棕噪/星海风"质感
-      const sr = ctx.sampleRate, len = Math.floor(2.5 * sr);
-      const buf = ctx.createBuffer(1, len, sr);
-      const d = buf.getChannelData(0);
-      let last = 0;
-      for (let i = 0; i < len; i++) {
-        const white = Math.random() * 2 - 1;
-        last = (last + 0.02 * white) / 1.02;
-        d[i] = last * 3.2;
+      const sr = ctx.sampleRate;
+
+      // 层1：高频白噪音 → 带通滤波 → 雨滴"嘶嘶"声
+      const len1 = Math.floor(3 * sr);
+      const buf1 = ctx.createBuffer(2, len1, sr);
+      for (let c = 0; c < 2; c++) {
+        const d = buf1.getChannelData(c);
+        for (let i = 0; i < len1; i++) d[i] = Math.random() * 2 - 1;
       }
-      const src = ctx.createBufferSource();
-      src.buffer = buf; src.loop = true;
-      // 低通滤掉刺耳高频
-      const lp = ctx.createBiquadFilter();
-      lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.6;
-      // 缓慢"呼吸"LFO，给噪音一点起伏，增强沉浸感
-      const breath = ctx.createGain(); breath.gain.value = 1;
-      const lfo = ctx.createOscillator(); lfo.frequency.value = 0.08;
-      const lfoAmt = ctx.createGain(); lfoAmt.gain.value = 0.2;
-      lfo.connect(lfoAmt).connect(breath.gain);
-      // 极低频暖垫，增加空间纵深
-      const drone = ctx.createOscillator(); drone.type = 'sine'; drone.frequency.value = 57;
-      const droneGain = ctx.createGain(); droneGain.gain.value = 0.015;
+      const src1 = ctx.createBufferSource();
+      src1.buffer = buf1; src1.loop = true;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass'; hp.frequency.value = 500; hp.Q.value = 0.5;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = 0.9;
+      const g1 = ctx.createGain(); g1.gain.value = 2.0;
+
+      // 层2：棕噪音（白噪音积分）→ 低通 → 雨打地面/屋顶的低沉声
+      const len2 = Math.floor(4.1 * sr);
+      const buf2 = ctx.createBuffer(1, len2, sr);
+      const d2 = buf2.getChannelData(0);
+      let b = 0;
+      for (let i = 0; i < len2; i++) {
+        const w = Math.random() * 2 - 1;
+        b = (b + 0.04 * w) / 1.04;
+        d2[i] = b * 3.5;
+      }
+      const src2 = ctx.createBufferSource();
+      src2.buffer = buf2; src2.loop = true;
+      const lp2 = ctx.createBiquadFilter();
+      lp2.type = 'lowpass'; lp2.frequency.value = 320; lp2.Q.value = 0.4;
+      const g2 = ctx.createGain(); g2.gain.value = 0.5;
+
+      // 缓慢 LFO：模拟阵雨强弱起伏
+      const env = ctx.createGain(); env.gain.value = 1;
+      const lfo = ctx.createOscillator(); lfo.frequency.value = 0.04;
+      const lfoAmt = ctx.createGain(); lfoAmt.gain.value = 0.18;
+      lfo.connect(lfoAmt); lfoAmt.connect(env.gain);
+
       master = ctx.createGain(); master.gain.value = 0;
-      src.connect(lp).connect(breath).connect(master);
-      drone.connect(droneGain).connect(master);
+      src1.connect(hp).connect(bp).connect(g1).connect(env);
+      src2.connect(lp2).connect(g2).connect(env);
+      env.connect(master);
       master.connect(ctx.destination);
-      lfo.start(); drone.start(); src.start();
+      lfo.start(); src1.start(); src2.start();
       return true;
     }
 
@@ -3529,7 +3662,7 @@
       if (ctx && ctx.state === 'suspended') ctx.resume();
       toggle.classList.toggle('playing', on);
       toggle.classList.toggle('hint', !on);
-      if (label) label.textContent = on ? '声音 · 开' : '声音 · 关';
+      if (label) label.textContent = on ? '雨声 · 开' : '雨声 · 关';
       fade(targetVol());
     }
 
