@@ -1,0 +1,3569 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IP Content Agent · Evolve Your Content</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-deep: #0a1430;
+    --bg-mid: #12244a;
+    --bg-soft: #2c4e80;
+    --accent-orange: #ff8a1e;
+    --accent-glow: #f5a623;
+    --text-hi: #ffffff;
+    --text-low: #8093b0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-hi);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 流动蓝色星云背景（CSS 还原原视频质感） ---------- */
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+
+  .nebula {
+    position: absolute;
+    inset: -25%;
+    background:
+      radial-gradient(42% 38% at 17% 80%, #c4dbf2 0%, #5a86bd 26%, rgba(44,78,128,0) 66%),
+      radial-gradient(48% 40% at 78% 86%, #a8cbee 0%, #3a648f 32%, rgba(24,52,92,0) 70%),
+      radial-gradient(70% 55% at 50% 104%, #7ba6d6 0%, rgba(60,100,150,0) 60%),
+      radial-gradient(58% 48% at 50% 16%, #050a1c 0%, #070e26 34%, rgba(10,20,48,0) 64%),
+      radial-gradient(130% 100% at 50% 28%, #0a1430 0%, #0c1838 42%, #16284e 100%);
+    filter: blur(36px) saturate(118%);
+    will-change: transform;
+    animation: drift 26s ease-in-out infinite alternate;
+  }
+
+  .nebula.b {
+    mix-blend-mode: screen;
+    opacity: .55;
+    background:
+      radial-gradient(40% 34% at 30% 72%, #9fc4ec 0%, rgba(70,110,165,0) 62%),
+      radial-gradient(38% 32% at 70% 80%, #88b3e0 0%, rgba(56,96,150,0) 64%);
+    animation: drift2 34s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    0%   { transform: translate3d(-2%, 1%, 0) scale(1.05) rotate(-1deg); }
+    100% { transform: translate3d(3%, -2%, 0) scale(1.14) rotate(1.5deg); }
+  }
+  @keyframes drift2 {
+    0%   { transform: translate3d(3%, 2%, 0) scale(1.1); }
+    100% { transform: translate3d(-3%, -1%, 0) scale(1.18); }
+  }
+
+  /* 跟随指针的光晕 */
+  .cursor-glow {
+    position: absolute;
+    top: 0; left: 0;
+    width: 540px; height: 540px;
+    margin: -270px 0 0 -270px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(150,190,235,.22) 0%, rgba(120,165,215,.10) 35%, rgba(255,138,30,.06) 55%, transparent 70%);
+    mix-blend-mode: screen;
+    will-change: transform;
+  }
+
+  /* 颗粒/暗角，增强氛围 */
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(4,8,22,.55) 100%);
+  }
+
+  /* ---------- 顶部导航栏（来自原应用） ---------- */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px clamp(18px, 4vw, 54px);
+    font-size: clamp(10px, .95vw, 13px);
+    opacity: 0;
+    animation: fadeDown 1s .2s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .2em; }
+  .brand .ring {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle, transparent 36%, var(--accent-orange) 47%, var(--accent-glow) 58%, transparent 72%);
+    box-shadow: 0 0 10px rgba(255,138,30,.7);
+  }
+  .nav-pill {
+    display: flex; align-items: center; gap: 2px;
+    padding: 6px 7px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .nav-pill a {
+    color: var(--text-low); text-decoration: none; letter-spacing: .16em;
+    padding: 8px 16px; border-radius: 100px; transition: .25s; white-space: nowrap;
+  }
+  .nav-pill a:hover { color: #fff; }
+  .nav-pill a.active {
+    color: #fff; border: 1px solid rgba(255,138,30,.55);
+    background: rgba(255,138,30,.07);
+  }
+  .login-btn {
+    color: var(--text-low); text-decoration: none; letter-spacing: .16em;
+    padding: 9px 20px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.16); transition: .25s;
+  }
+  .login-btn:hover { color: #fff; border-color: rgba(255,138,30,.6); }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 860px) { .nav-pill { display: none; } }
+
+  /* ---------- 主视觉 ---------- */
+  .hero {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 6vw;
+  }
+
+  .label {
+    font-weight: 700;
+    font-size: clamp(18px, 2vw, 26px);
+    letter-spacing: .01em;
+    margin-bottom: clamp(34px, 7vh, 72px);
+    opacity: 0;
+    animation: fadeUp 1.1s .2s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  .headline {
+    font-family: "Raleway", "Inter", sans-serif;
+    font-weight: 200;
+    font-size: clamp(20px, 5.2vw, 92px);
+    line-height: 1;
+    letter-spacing: .2em;
+    padding-left: .2em; /* 补偿字距，保持视觉居中 */
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  .headline .word { display: inline-flex; }
+  .headline .gap { width: .9em; }
+
+  .headline .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: charIn .9s forwards cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* 日食光环：取代 YOUR 的 O */
+  .eclipse {
+    position: relative;
+    display: inline-block;
+    width: .72em; height: .72em;
+    margin: 0 .02em;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      transparent           0%,
+      transparent           36%,
+      rgba(140,60,0,.35)    39%,
+      rgba(215,100,0,.85)   42%,
+      rgba(255,145,5,1)     44.5%,
+      rgba(255,175,40,1)    46%,
+      rgba(255,145,5,1)     47.5%,
+      rgba(235,110,0,.85)   50%,
+      rgba(185,80,0,.52)    55%,
+      rgba(120,50,0,.24)    63%,
+      rgba(70,28,0,.09)     73%,
+      transparent           84%);
+    box-shadow:
+      0 0  16px  4px rgba(255,145,10,1),
+      0 0  44px 14px rgba(230,105,5,.65),
+      0 0  86px 32px rgba(190,78,0,.34),
+      0 0 145px 58px rgba(150,58,0,.17);
+    animation: pulse 4s ease-in-out infinite;
+    transition: box-shadow .3s ease, transform .3s ease;
+  }
+  .eclipse::before { content: none; }
+  .eclipse::after {
+    content: "";
+    position: absolute; inset: 17%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #060c1e 50%, #070d24 100%);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.95);
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow:
+        0 0  16px  4px rgba(255,145,10,1),
+        0 0  44px 14px rgba(230,105,5,.65),
+        0 0  86px 32px rgba(190,78,0,.34),
+        0 0 145px 58px rgba(150,58,0,.17);
+    }
+    50% {
+      box-shadow:
+        0 0  22px  6px rgba(255,155,15,1),
+        0 0  60px 20px rgba(240,115,8,.75),
+        0 0 112px 44px rgba(205,88,0,.44),
+        0 0 185px 78px rgba(165,65,0,.23);
+    }
+  }
+
+  /* ---------- 中文标题 ---------- */
+  .cn-block {
+    margin-top: clamp(26px, 5vh, 52px);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1.1s 1.25s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .cn-title {
+    font-size: clamp(17px, 2.3vw, 30px);
+    font-weight: 300;
+    letter-spacing: .42em;
+    padding-left: .42em;
+    color: var(--text-hi);
+  }
+  .cn-tag {
+    margin-top: 16px;
+    font-size: clamp(12px, 1.05vw, 15px);
+    font-weight: 300;
+    letter-spacing: .16em;
+    color: var(--text-low);
+  }
+  .cn-tag b { color: #c3d4ec; font-weight: 400; }
+
+  /* ---------- 引导进入按钮 ---------- */
+  .actions {
+    margin-top: clamp(40px, 8vh, 78px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    opacity: 0;
+    animation: fadeUp 1.1s 1.6s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  .enter-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 38px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.04);
+    color: var(--text-hi);
+    font-size: clamp(14px, 1.15vw, 17px);
+    font-weight: 600;
+    letter-spacing: .04em;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), border-color .35s, box-shadow .35s;
+  }
+  .enter-btn .glow {
+    position: absolute; inset: 0; border-radius: inherit;
+    background: radial-gradient(120px 120px at var(--mx,50%) var(--my,50%), rgba(255,138,30,.32), transparent 70%);
+    opacity: 0; transition: opacity .35s;
+  }
+  .enter-btn span { position: relative; z-index: 1; }
+  .enter-btn .arrow {
+    position: relative; z-index: 1;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1);
+  }
+  .enter-btn:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,138,30,.7);
+    box-shadow: 0 10px 40px -8px rgba(255,138,30,.4);
+  }
+  .enter-btn:hover .glow { opacity: 1; }
+  .enter-btn:hover .arrow { transform: translateX(6px); }
+
+  /* 向下引导提示 */
+  .scroll-hint {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-low);
+    font-size: 12px; letter-spacing: .25em; text-transform: uppercase;
+  }
+  .scroll-hint .chev {
+    width: 18px; height: 18px;
+    border-right: 1.5px solid var(--text-low);
+    border-bottom: 1.5px solid var(--text-low);
+    transform: rotate(45deg);
+    animation: bob 1.8s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: rotate(45deg) translate(0,0); opacity: .4; }
+    50%      { transform: rotate(45deg) translate(3px,3px); opacity: 1; }
+  }
+
+  @keyframes fadeUp { to { opacity: 1; transform: none; } }
+  @keyframes charIn { to { opacity: 1; transform: none; } }
+
+  /* ---------- 环境音开关 ---------- */
+  .sound-toggle {
+    position: fixed; right: clamp(18px,3vw,34px); bottom: clamp(18px,3vw,32px);
+    z-index: 45; display: inline-flex; align-items: center; gap: 11px;
+    padding: 10px 18px 10px 15px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--text-low); cursor: pointer;
+    font-family: inherit; font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: opacity .5s ease, transform .5s ease, border-color .3s, color .3s, background .3s, box-shadow .3s;
+  }
+  .sound-toggle.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .sound-toggle:hover { color: #fff; border-color: rgba(255,138,30,.55); background: rgba(255,138,30,.06); }
+  .sound-toggle.playing { border-color: rgba(255,138,30,.5); color: #ffd9a8; box-shadow: 0 0 28px -6px rgba(255,138,30,.5); }
+  .sound-toggle::after {
+    content: ""; position: absolute; inset: -1px; border-radius: 100px;
+    pointer-events: none; box-shadow: 0 0 0 0 rgba(255,138,30,0);
+  }
+  .sound-toggle.hint::after { animation: sndHint 2.6s 3s ease-in-out infinite; }
+  .sound-toggle.playing::after { animation: none; }
+  @keyframes sndHint { 0%,100%{ box-shadow: 0 0 0 0 rgba(255,138,30,0); } 50%{ box-shadow: 0 0 24px -4px rgba(255,138,30,.5); } }
+
+  .sound-bars { display: inline-flex; align-items: center; gap: 2.5px; height: 15px; }
+  .sound-bars i {
+    width: 2.5px; border-radius: 2px; background: currentColor;
+    height: 30%; opacity: .55; transition: height .2s, opacity .2s;
+  }
+  .sound-toggle.playing .sound-bars i { background: var(--accent-orange); opacity: 1; animation: sndBar 1s ease-in-out infinite; }
+  .sound-toggle.playing .sound-bars i:nth-child(1){ animation-delay: 0s; }
+  .sound-toggle.playing .sound-bars i:nth-child(2){ animation-delay: .25s; }
+  .sound-toggle.playing .sound-bars i:nth-child(3){ animation-delay: .5s; }
+  .sound-toggle.playing .sound-bars i:nth-child(4){ animation-delay: .15s; }
+  @keyframes sndBar { 0%,100%{ height: 22%; } 50%{ height: 100%; } }
+  @media (hover: hover) and (pointer: fine) { .sound-toggle { cursor: none; } }
+
+  /* ---------- 自定义指针 ---------- */
+  .cursor-dot, .cursor-ring {
+    position: fixed; top: 0; left: 0;
+    border-radius: 50%;
+    pointer-events: none; z-index: 50;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen;
+  }
+  .cursor-dot { width: 7px; height: 7px; background: #ffd9a8; box-shadow: 0 0 12px var(--accent-orange); }
+  .cursor-ring {
+    width: 40px; height: 40px;
+    border: 1px solid rgba(180,205,235,.7);
+    transition: width .3s, height .3s, border-color .3s, background .3s;
+  }
+  .cursor-ring.hot {
+    width: 64px; height: 64px;
+    border-color: rgba(255,138,30,.9);
+    background: rgba(255,138,30,.08);
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .cursor-dot, .cursor-ring { display: none; }
+    body { cursor: auto; }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    body, a, button { cursor: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nebula, .eclipse, .chev { animation: none !important; }
+  }
+
+  /* ========== 第三页：人格问卷 ========== */
+  #page3 {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 6vw;
+    opacity: 0; pointer-events: none;
+    transition: opacity .5s cubic-bezier(.2,.7,.2,1);
+  }
+  #page3.visible { opacity: 1; pointer-events: auto; }
+
+  .quiz-wrap {
+    width: 100%; max-width: 860px;
+  }
+
+  /* 问卷卡片 */
+  .quiz-card {
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 22px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    padding: clamp(28px,4vh,48px) clamp(28px,4vw,52px);
+    box-shadow: 0 24px 64px -12px rgba(0,0,0,.45), 0 0 0 1px rgba(255,138,30,.06) inset;
+  }
+
+  .quiz-counter {
+    font-size: 12px; letter-spacing: .32em; text-transform: uppercase;
+    color: rgba(128,147,176,.7); margin-bottom: 20px; font-weight: 600;
+  }
+
+  .quiz-question {
+    font-size: clamp(23px,3vw,38px);
+    font-weight: 400; color: #fff;
+    letter-spacing: .02em; line-height: 1.3;
+    margin-bottom: clamp(24px,3.5vh,40px);
+  }
+
+  /* 2×2 选项网格 */
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: clamp(24px,3.5vh,40px);
+  }
+  @media (max-width: 580px) { .quiz-options { grid-template-columns: 1fr; } }
+
+  .quiz-opt {
+    display: flex; align-items: center;
+    padding: 18px 22px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.13);
+    background: rgba(255,255,255,.04);
+    color: rgba(255,255,255,.82);
+    font-size: clamp(15px,1.3vw,18px);
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: border-color .22s, background .22s, box-shadow .22s, color .22s;
+    user-select: none;
+  }
+  .quiz-opt:hover {
+    border-color: rgba(255,255,255,.28);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+  }
+  .quiz-opt.selected {
+    border-color: rgba(255,138,30,.85);
+    background: rgba(255,138,30,.07);
+    color: #fff;
+    box-shadow:
+      0 -6px 24px -4px rgba(255,138,30,.38),
+      0 0 0 1px rgba(255,138,30,.25) inset;
+  }
+
+  /* 底部导航 */
+  .quiz-nav {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .quiz-back {
+    background: none;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 100px; padding: 11px 26px;
+    color: rgba(255,255,255,.55); font-size: 14px;
+    letter-spacing: .1em; cursor: pointer;
+    transition: .22s; font-family: inherit;
+  }
+  .quiz-back:hover { color: #fff; border-color: rgba(255,255,255,.35); }
+
+  .quiz-next {
+    padding: 12px 32px; border-radius: 100px;
+    border: none;
+    background: var(--accent-orange);
+    color: #fff; font-size: 15px; font-weight: 600;
+    letter-spacing: .06em; cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 6px 24px -4px rgba(255,138,30,.55);
+    transition: background .22s, transform .22s, box-shadow .22s;
+  }
+  .quiz-next:hover {
+    background: #ff9c3a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px -4px rgba(255,138,30,.7);
+  }
+  .quiz-next:disabled {
+    opacity: .38; cursor: not-allowed; transform: none;
+    box-shadow: none;
+  }
+
+  /* 进度条 */
+  .quiz-progress {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 28px; justify-content: center;
+  }
+  .quiz-prog-dot {
+    height: 3px; border-radius: 2px; background: rgba(255,255,255,.18);
+    transition: width .35s, background .35s;
+    width: 20px;
+  }
+  .quiz-prog-dot.on { background: var(--accent-orange); width: 36px; }
+
+  /* ========== 第五页：人格画像 ========== */
+  #page5 {
+    position: fixed; inset: 0; z-index: 10;
+    opacity: 0; pointer-events: none;
+    transition: opacity .6s cubic-bezier(.2,.7,.2,1);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  #page5.visible { opacity: 1; pointer-events: auto; }
+
+  .p5-intro {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 32px;
+    z-index: 2;
+    transition: opacity .7s ease;
+  }
+  .p5-intro.hidden { opacity: 0; pointer-events: none; }
+
+  .p5-big-ring {
+    position: relative; width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle,
+      transparent 0%, transparent 36%,
+      rgba(140,60,0,.35) 39%, rgba(215,100,0,.85) 42%,
+      rgba(255,145,5,1) 44.5%, rgba(255,175,40,1) 46%,
+      rgba(255,145,5,1) 47.5%, rgba(235,110,0,.85) 50%,
+      rgba(185,80,0,.52) 55%, rgba(120,50,0,.24) 63%,
+      rgba(70,28,0,.09) 73%, transparent 84%);
+    animation: pulseBreath 3s ease-in-out infinite;
+  }
+  .p5-big-ring::after {
+    content: ""; position: absolute; inset: 17%; border-radius: 50%;
+    background: radial-gradient(circle, #060c1e 50%, #070d24 100%);
+    box-shadow: inset 0 0 16px rgba(0,0,0,.98);
+  }
+  @keyframes pulseBreath {
+    0%, 100% {
+      box-shadow: 0 0 22px 6px rgba(255,145,10,1), 0 0 60px 20px rgba(230,105,5,.65), 0 0 110px 42px rgba(190,78,0,.34), 0 0 180px 75px rgba(150,58,0,.17);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 30px 9px rgba(255,155,15,1), 0 0 82px 28px rgba(240,115,8,.78), 0 0 148px 58px rgba(205,88,0,.44), 0 0 240px 100px rgba(165,65,0,.24);
+      transform: scale(1.06);
+    }
+  }
+  .p5-analyzing-text {
+    font-size: 12px; letter-spacing: .30em; text-transform: uppercase;
+    color: rgba(255,145,10,.7); animation: breathText 2s ease-in-out infinite;
+  }
+  @keyframes breathText { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  /* 人格画像加载：轮播文案 + 进度条 */
+  .p5-load-box { display:flex; flex-direction:column; align-items:center; gap:15px; }
+  .p5-load-step {
+    font-family:"PingFang SC","Hiragino Sans GB",inherit;
+    font-size: clamp(15px,1.4vw,18px); font-weight:300; letter-spacing:.10em;
+    color:#fff; text-align:center; min-height:1.4em;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .p5-load-step.swap { opacity:0; transform:translateY(6px); }
+  .p5-dots { margin-left:2px; letter-spacing:0; }
+  .p5-dots i { font-style:normal; opacity:0; animation:p5dot 1.4s infinite; }
+  .p5-dots i:nth-child(2){ animation-delay:.22s; }
+  .p5-dots i:nth-child(3){ animation-delay:.44s; }
+  @keyframes p5dot { 0%,100%{opacity:0} 45%{opacity:1} }
+  .p5-load-bar { width:clamp(200px,30vw,320px); height:3px; border-radius:3px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .p5-load-fill { height:100%; width:8%; border-radius:3px;
+    background:linear-gradient(90deg, rgba(255,145,10,.55), var(--accent-orange));
+    box-shadow:0 0 14px rgba(255,138,30,.6);
+    transition: width .7s cubic-bezier(.4,.1,.2,1); }
+  .p5-load-sub { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(128,147,176,.6); }
+
+  .p5-content {
+    position: relative; z-index: 1;
+    padding: clamp(40px,7vh,70px) clamp(20px,6vw,80px) 60px;
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .p5-content.revealed { opacity: 1; transform: none; }
+
+  .p5-header { display: flex; align-items: center; gap: 28px; margin-bottom: clamp(28px,4vh,44px); }
+  .p5-ring-sm {
+    position: relative; width: 66px; height: 66px; flex-shrink: 0; border-radius: 50%;
+    background: radial-gradient(circle,
+      transparent 0%, transparent 36%,
+      rgba(140,60,0,.35) 39%, rgba(215,100,0,.85) 42%,
+      rgba(255,145,5,1) 44.5%, rgba(255,175,40,1) 46%,
+      rgba(255,145,5,1) 47.5%, rgba(235,110,0,.85) 50%,
+      rgba(185,80,0,.52) 55%, rgba(120,50,0,.24) 63%,
+      rgba(70,28,0,.09) 73%, transparent 84%);
+    box-shadow: 0 0 12px 3px rgba(255,145,10,1), 0 0 34px 10px rgba(230,105,5,.6), 0 0 64px 24px rgba(190,78,0,.3);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .p5-ring-sm::after { content:""; position:absolute; inset:17%; border-radius:50%; background:radial-gradient(circle,#060c1e 50%,#070d24 100%); }
+  .p5-eyebrow { font-size:11px; letter-spacing:.30em; text-transform:uppercase; color:rgba(255,145,10,.65); margin-bottom:8px; font-weight:600; }
+  .p5-name { font-family:"Raleway","Inter",sans-serif; font-weight:200; font-size:clamp(28px,3.5vw,48px); letter-spacing:.22em; color:#fff; line-height:1; }
+  .p5-tagline { font-size:clamp(15px,1.2vw,18px); color:var(--accent-orange); letter-spacing:.10em; margin-top:6px; }
+  .p5-track-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .p5-track-tag { font-size:12px; padding:4px 14px; border-radius:100px; border:1px solid rgba(255,145,10,.38); color:rgba(255,145,10,.75); letter-spacing:.08em; }
+
+  .p5-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:720px){.p5-grid{grid-template-columns:1fr}}
+
+  .p5-card {
+    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.11); border-radius:18px;
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    padding:clamp(18px,2.5vh,28px) clamp(18px,2vw,28px);
+    box-shadow:0 20px 56px -12px rgba(0,0,0,.4),0 0 0 1px rgba(255,138,30,.05) inset;
+    opacity:0; transform:translateY(18px); transition:opacity .6s ease,transform .6s ease;
+  }
+  .p5-card.show{opacity:1;transform:none}
+  .p5-wide{grid-column:span 2}
+  @media(max-width:720px){.p5-wide{grid-column:span 1}}
+
+  .p5-card-label{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:rgba(128,147,176,.6);margin-bottom:16px;font-weight:600}
+  .p5-sub-label{font-size:11px;letter-spacing:.20em;text-transform:uppercase;color:rgba(128,147,176,.5);margin:14px 0 8px;font-weight:600}
+  .p5-value-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(14px,1.1vw,15px);line-height:1.65;color:rgba(255,255,255,.78);font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p5-value-item:last-child{border-bottom:none;padding-bottom:0}
+  .p5-dot{width:5px;height:5px;border-radius:50%;background:var(--accent-orange);flex-shrink:0;margin-top:7px}
+  .p5-tone{font-size:clamp(14px,1.1vw,15px);line-height:1.75;color:rgba(255,255,255,.7);margin-bottom:4px;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p5-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .p5-chip{font-size:13px;padding:5px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.68);letter-spacing:.03em;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p5-chip-ban{border-color:rgba(220,80,60,.3);color:rgba(220,120,100,.7)}
+  .p5-persona-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:720px){.p5-persona-grid{grid-template-columns:1fr}}
+  .p5-persona-item{background:rgba(255,255,255,.035);border-radius:12px;padding:14px 16px;border:1px solid rgba(255,255,255,.08)}
+  .p5-persona-title{font-size:15px;font-weight:600;color:rgba(255,255,255,.88);margin-bottom:6px;letter-spacing:.02em}
+  .p5-persona-desc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.55);font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p5-props{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:720px){.p5-props{grid-template-columns:1fr}}
+  .p5-prop-num{font-size:28px;font-weight:200;letter-spacing:.08em;color:rgba(255,145,10,.45);line-height:1;margin-bottom:8px;font-family:"Raleway","Inter",sans-serif}
+  .p5-prop-title{font-size:16px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:8px;letter-spacing:.04em}
+  .p5-prop-desc{font-size:13px;line-height:1.75;color:rgba(255,255,255,.55);font-family:"PingFang SC","Hiragino Sans GB",inherit}
+
+  /* ========== 第六页：文章上传与风格分析 ========== */
+  #page6 {
+    position: fixed; inset: 0; z-index: 10;
+    opacity: 0; pointer-events: none;
+    transition: opacity .55s cubic-bezier(.2,.7,.2,1);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  #page6.visible { opacity: 1; pointer-events: auto; }
+  .p6-wrap { min-height:100%; padding:clamp(36px,6vh,64px) clamp(20px,6vw,80px) 60px; display:flex; flex-direction:column; gap:26px; }
+  .p6-eyebrow{font-size:10px;letter-spacing:.30em;text-transform:uppercase;color:rgba(255,145,10,.65);margin-bottom:10px;font-weight:600;text-align:center}
+  .p6-title{font-family:"Raleway","Inter",sans-serif;font-weight:200;font-size:clamp(24px,3.2vw,44px);letter-spacing:.18em;color:#fff;text-align:center}
+  .p6-sub{margin-top:10px;font-size:clamp(12px,.95vw,14px);color:rgba(128,147,176,.7);letter-spacing:.04em;line-height:1.7;font-family:"PingFang SC","Hiragino Sans GB",inherit;text-align:center;max-width:680px;margin-left:auto;margin-right:auto}
+  .p6-main{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+  @media(max-width:760px){.p6-main{grid-template-columns:1fr}}
+  .p6-card-shell{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:clamp(18px,2.5vh,28px) clamp(18px,2vw,28px);box-shadow:0 20px 56px -12px rgba(0,0,0,.4),0 0 0 1px rgba(255,138,30,.05) inset;height:100%;box-sizing:border-box}
+  .p6-section-label{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(128,147,176,.6);margin-bottom:16px;font-weight:600}
+  .p6-dropzone{border:1.5px dashed rgba(255,145,10,.32);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:.25s;display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:16px}
+  .p6-dropzone:hover{border-color:rgba(255,145,10,.7);background:rgba(255,145,10,.04)}
+  .p6-drop-icon{margin-bottom:4px}
+  .p6-drop-title{font-size:14px;color:rgba(255,255,255,.75);letter-spacing:.04em}
+  .p6-drop-hint{font-size:11px;color:rgba(128,147,176,.55);letter-spacing:.08em}
+  .p6-file-list{display:flex;flex-direction:column;gap:8px}
+  .p6-file-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 14px}
+  .p6-file-icon{font-size:14px;flex-shrink:0}
+  .p6-file-name{font-size:12px;color:rgba(255,255,255,.72);flex:1;letter-spacing:.02em;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p6-file-badge{font-size:10px;padding:3px 9px;border-radius:100px;border:1px solid rgba(255,145,10,.4);color:rgba(255,145,10,.75);letter-spacing:.08em;flex-shrink:0}
+  .p6-bench-legend{font-size:11px;color:rgba(128,147,176,.55);letter-spacing:.05em;margin-bottom:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .p6-legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-left:8px;flex-shrink:0}
+  .p6-legend-dot.good{background:rgba(255,145,10,.8)}
+  .p6-legend-dot.mid{background:rgba(128,147,176,.6)}
+  .p6-legend-dot.bad{background:rgba(210,70,55,.7)}
+  .p6-bench-add-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .p6-bench-input{flex:1;min-width:120px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:10px 14px;color:#fff;font-family:inherit;font-size:13px;outline:none;transition:.22s}
+  .p6-bench-input:focus{border-color:rgba(255,145,10,.45);background:rgba(255,145,10,.04)}
+  .p6-bench-input::placeholder{color:rgba(128,147,176,.45)}
+  .p6-rating-group{display:flex;gap:5px}
+  .p6-r-btn{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:.2s;font-family:inherit}
+  .p6-r-btn:hover{border-color:rgba(255,255,255,.3);color:#fff}
+  .p6-r-btn.selected[data-r="好"]{background:rgba(255,145,10,.18);border-color:rgba(255,145,10,.7);color:rgba(255,165,30,1)}
+  .p6-r-btn.selected[data-r="中"]{background:rgba(128,147,176,.15);border-color:rgba(128,147,176,.5);color:rgba(180,200,220,.9)}
+  .p6-r-btn.selected[data-r="差"]{background:rgba(210,70,55,.15);border-color:rgba(210,70,55,.6);color:rgba(230,100,80,.9)}
+  .p6-add-btn{padding:9px 16px;border-radius:10px;border:1px solid rgba(255,145,10,.45);background:rgba(255,145,10,.08);color:rgba(255,145,10,.85);font-size:12px;cursor:pointer;white-space:nowrap;transition:.2s;font-family:inherit}
+  .p6-add-btn:hover{background:rgba(255,145,10,.18);border-color:rgba(255,145,10,.7);color:#fff}
+  .p6-bench-list{display:flex;flex-direction:column;gap:8px}
+  .p6-bench-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 14px}
+  .p6-bench-name{flex:1;font-size:13px;color:rgba(255,255,255,.75);letter-spacing:.02em}
+  .p6-bench-tag{font-size:10px;padding:3px 10px;border-radius:100px;font-weight:600;letter-spacing:.1em;flex-shrink:0}
+  .p6-bench-tag.good{background:rgba(255,145,10,.18);border:1px solid rgba(255,145,10,.4);color:rgba(255,165,30,1)}
+  .p6-bench-tag.mid{background:rgba(128,147,176,.15);border:1px solid rgba(128,147,176,.35);color:rgba(180,200,220,.9)}
+  .p6-bench-tag.bad{background:rgba(210,70,55,.14);border:1px solid rgba(210,70,55,.4);color:rgba(230,110,90,.9)}
+  .p6-bench-remove{font-size:14px;color:rgba(128,147,176,.4);cursor:pointer;padding:0 4px;transition:.2s;flex-shrink:0}
+  .p6-bench-remove:hover{color:rgba(220,80,60,.8)}
+  .p6-action-bar{display:flex;align-items:center;justify-content:space-between}
+  .p6-analyze-btn{padding:13px 38px;border-radius:100px;border:none;background:var(--accent-orange);color:#fff;font-size:15px;font-weight:600;letter-spacing:.06em;cursor:pointer;font-family:inherit;box-shadow:0 6px 28px -4px rgba(255,138,30,.6);transition:.22s}
+  .p6-analyze-btn:hover{background:#ff9c3a;transform:translateY(-2px);box-shadow:0 10px 36px -4px rgba(255,138,30,.75)}
+  .p6-profile-out{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;pointer-events:none}
+  .p6-profile-out.revealed{opacity:1;transform:none;pointer-events:auto}
+  .p6-profile-header{display:flex;align-items:center;gap:20px;margin-bottom:20px}
+  .p6-ring-xs{position:relative;width:48px;height:48px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle,transparent 0%,transparent 36%,rgba(140,60,0,.35) 39%,rgba(215,100,0,.85) 42%,rgba(255,145,5,1) 44.5%,rgba(255,175,40,1) 46%,rgba(255,145,5,1) 47.5%,rgba(235,110,0,.85) 50%,rgba(185,80,0,.52) 55%,rgba(120,50,0,.24) 63%,rgba(70,28,0,.09) 73%,transparent 84%);box-shadow:0 0 10px 2px rgba(255,145,10,1),0 0 28px 8px rgba(230,105,5,.55),0 0 52px 18px rgba(190,78,0,.28);animation:pulse 4s ease-in-out infinite}
+  .p6-ring-xs::after{content:"";position:absolute;inset:17%;border-radius:50%;background:radial-gradient(circle,#060c1e 50%,#070d24 100%)}
+  .p6-profile-eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,145,10,.65);margin-bottom:5px;font-weight:600}
+  .p6-profile-title{font-size:clamp(18px,2vw,26px);font-weight:300;letter-spacing:.12em;color:#fff}
+  .p6-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.p6-profile-grid{grid-template-columns:1fr}}
+  .p6-wide2{grid-column:span 2}
+  @media(max-width:720px){.p6-wide2{grid-column:span 1}}
+  .p6-profile-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);border-radius:16px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:clamp(16px,2vh,24px) clamp(16px,2vw,24px);box-shadow:0 16px 48px -10px rgba(0,0,0,.4);opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+  .p6-profile-card.show{opacity:1;transform:none}
+  .p6-card-label2{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(128,147,176,.6);margin-bottom:14px;font-weight:600}
+  .p6-style-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+  .p6-style-row:last-child{border-bottom:none}
+  .p6-style-key{width:68px;flex-shrink:0;color:rgba(255,145,10,.75);font-weight:600;letter-spacing:.04em}
+  .p6-style-val{color:rgba(255,255,255,.7);line-height:1.65;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p6-topic-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .p6-topic-chip{font-size:12px;padding:5px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.68);font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .p6-formula{font-size:12px;line-height:1.75;color:rgba(255,145,10,.7);font-family:"PingFang SC","Hiragino Sans GB",inherit;background:rgba(255,145,10,.06);border-radius:8px;padding:10px 14px;border:1px solid rgba(255,145,10,.15);margin-top:12px}
+  .p6-fp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  @media(max-width:720px){.p6-fp-grid{grid-template-columns:1fr}}
+  .p6-fp-label{font-size:11px;letter-spacing:.16em;font-weight:600;margin-bottom:10px}
+  .p6-fp-label.good-c{color:rgba(255,145,10,.8)}
+  .p6-fp-label.bad-c{color:rgba(210,80,60,.8)}
+  .p6-fp-chips{display:flex;flex-direction:column;gap:6px}
+  .p6-fp-chip{font-size:11px;padding:5px 12px;border-radius:8px;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  .good-chip{background:rgba(255,145,10,.09);border:1px solid rgba(255,145,10,.22);color:rgba(255,165,30,.85)}
+  .bad-chip{background:rgba(210,70,55,.08);border:1px solid rgba(210,70,55,.22);color:rgba(225,100,80,.8)}
+  .p6-bench-summary{display:flex;flex-direction:column;gap:8px}
+  .p6-bs-item{display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(255,255,255,.65);font-family:"PingFang SC","Hiragino Sans GB",inherit}
+  /* 第五页底部引导 */
+  .p5-guide-bar{display:flex;justify-content:flex-end;align-items:center;gap:16px;padding-top:24px;margin-top:8px;border-top:1px solid rgba(255,255,255,.07);opacity:0;transform:translateY(10px);transition:opacity .6s .5s ease,transform .6s .5s ease}
+  .p5-guide-bar.show{opacity:1;transform:none}
+  .p5-guide-hint{font-size:12px;letter-spacing:.16em;color:rgba(128,147,176,.5);text-transform:uppercase}
+  .p5-guide-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:100px;border:1px solid rgba(255,145,10,.5);background:rgba(255,145,10,.08);color:rgba(255,165,30,.9);font-size:14px;font-weight:600;letter-spacing:.08em;cursor:pointer;transition:.22s;font-family:inherit}
+  .p5-guide-btn:hover{background:rgba(255,145,10,.18);border-color:rgba(255,145,10,.9);color:#fff;transform:translateX(4px)}
+
+  /* ========== 第七页：选题 ========== */
+  #page7{position:fixed;inset:0;z-index:10;opacity:0;pointer-events:none;transition:opacity .55s cubic-bezier(.2,.7,.2,1);overflow-y:auto;overflow-x:hidden}
+  #page7.visible{opacity:1;pointer-events:auto}
+
+  .p7-wrap{min-height:100%;padding:clamp(108px,12vh,128px) clamp(20px,6vw,80px) clamp(28px,4vh,44px);display:flex;flex-direction:column;gap:clamp(20px,2.6vh,28px)}
+
+  /* 顶部：光圈 + 标题 */
+  .p7-header{display:flex;align-items:center;justify-content:center;gap:24px}
+  .p7-ring-md{
+    position:relative;width:56px;height:56px;flex-shrink:0;border-radius:50%;
+    background:radial-gradient(circle,transparent 0%,transparent 36%,rgba(140,60,0,.35) 39%,rgba(215,100,0,.85) 42%,rgba(255,145,5,1) 44.5%,rgba(255,175,40,1) 46%,rgba(255,145,5,1) 47.5%,rgba(235,110,0,.85) 50%,rgba(185,80,0,.52) 55%,rgba(120,50,0,.24) 63%,rgba(70,28,0,.09) 73%,transparent 84%);
+    box-shadow:0 0 12px 3px rgba(255,145,10,1),0 0 36px 11px rgba(230,105,5,.6),0 0 68px 26px rgba(190,78,0,.3);
+    animation:pulse 4s ease-in-out infinite;
+  }
+  .p7-ring-md::after{content:"";position:absolute;inset:17%;border-radius:50%;background:radial-gradient(circle,#060c1e 50%,#070d24 100%)}
+  .p7-header-text{text-align:left}
+  .p7-eyebrow{font-size:10px;letter-spacing:.30em;text-transform:uppercase;color:rgba(255,145,10,.65);margin-bottom:6px;font-weight:600}
+  .p7-title{font-family:"Raleway","PingFang SC","Inter",sans-serif;font-weight:200;font-size:clamp(22px,3vw,42px);letter-spacing:.12em;color:#fff;line-height:1.1}
+  .p7-sub{font-size:clamp(11px,.9vw,13px);color:rgba(128,147,176,.6);letter-spacing:.10em;margin-top:5px}
+
+  /* 双栏 */
+  .p7-main{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
+  @media(max-width:760px){.p7-main{grid-template-columns:1fr}}
+
+  .p7-card-shell{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:clamp(18px,2.5vh,28px) clamp(18px,2vw,28px);box-shadow:0 20px 56px -12px rgba(0,0,0,.4),0 0 0 1px rgba(255,138,30,.05) inset;display:flex;flex-direction:column;gap:0}
+
+  .p7-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .p7-panel-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.04em}
+  .p7-panel-ring{position:relative;width:22px;height:22px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle,transparent 0%,transparent 36%,rgba(140,60,0,.35) 39%,rgba(215,100,0,.85) 42%,rgba(255,145,5,1) 44.5%,rgba(255,175,40,1) 46%,rgba(255,145,5,1) 47.5%,rgba(235,110,0,.85) 50%,rgba(185,80,0,.52) 55%,transparent 72%);box-shadow:0 0 5px 1px rgba(255,145,10,.9),0 0 14px 4px rgba(230,105,5,.5);animation:pulse 4s ease-in-out infinite}
+  .p7-panel-ring::after{content:"";position:absolute;inset:18%;border-radius:50%;background:#070d24}
+
+  /* 选题卡片 */
+  .p7-topic-list{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1;min-height:160px;padding-right:2px}
+  .p7-topic-list::-webkit-scrollbar{width:3px}
+  .p7-topic-list::-webkit-scrollbar-track{background:transparent}
+  .p7-topic-list::-webkit-scrollbar-thumb{background:rgba(255,145,10,.3);border-radius:2px}
+
+  .p7-topic-card{
+    padding:14px 18px;border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+    transition:border-color .22s,background .22s,box-shadow .22s;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  }
+  .p7-topic-card:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.07)}
+  .p7-topic-card.selected{
+    border-color:rgba(255,145,10,.8);background:rgba(255,145,10,.07);
+    box-shadow:0 0 0 1px rgba(255,145,10,.3),0 4px 20px -4px rgba(255,145,10,.3);
+  }
+  .p7-tc-left{flex:1;min-width:0}
+  .p7-tc-title{font-size:clamp(12px,.95vw,14px);color:rgba(255,255,255,.85);line-height:1.5;letter-spacing:.02em;font-family:"PingFang SC","Hiragino Sans GB",inherit;margin-bottom:5px}
+  .p7-tc-source{font-size:11px;color:rgba(128,147,176,.55);letter-spacing:.06em}
+  .p7-heat{display:flex;align-items:center;gap:4px;flex-shrink:0;font-size:12px;color:rgba(255,145,10,.8);font-weight:600;white-space:nowrap}
+  .p7-flame{font-size:13px}
+
+  /* 右栏输入 */
+  .p7-field-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(128,147,176,.6);margin-bottom:9px;font-weight:600;margin-top:18px}
+  .p7-card-shell>.p7-field-label:first-of-type{margin-top:0}
+  .p7-custom-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:13px 16px;color:#fff;font-family:"PingFang SC","Hiragino Sans GB",inherit;font-size:13px;letter-spacing:.02em;outline:none;transition:.22s;box-sizing:border-box}
+  .p7-custom-input:focus{border-color:rgba(255,145,10,.45);background:rgba(255,145,10,.04);box-shadow:0 0 0 3px rgba(255,145,10,.07)}
+  .p7-custom-input::placeholder{color:rgba(128,147,176,.42)}
+
+  .p7-tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .p7-tag{font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.6);cursor:pointer;transition:.2s;font-family:"PingFang SC","Hiragino Sans GB",inherit;letter-spacing:.03em;user-select:none}
+  .p7-tag:hover{border-color:rgba(255,255,255,.3);color:#fff}
+  .p7-tag.on{border-color:rgba(255,145,10,.7);background:rgba(255,145,10,.1);color:rgba(255,165,30,.9)}
+
+  .p7-hint{font-size:11px;color:rgba(128,147,176,.48);line-height:1.7;letter-spacing:.04em;margin-top:auto;padding-top:18px;font-family:"PingFang SC","Hiragino Sans GB",inherit}
+
+  /* 底部 */
+  .p7-footer{display:flex;align-items:center;justify-content:space-between}
+  .p7-studio-btn{padding:14px 38px;border-radius:100px;border:none;background:var(--accent-orange);color:#fff;font-size:15px;font-weight:600;letter-spacing:.06em;cursor:pointer;font-family:inherit;box-shadow:0 6px 28px -4px rgba(255,138,30,.6);transition:.22s}
+  .p7-studio-btn:hover{background:#ff9c3a;transform:translateY(-2px);box-shadow:0 10px 36px -4px rgba(255,138,30,.75)}
+
+  /* ========== 第四页：开放问答 ========== */
+  #page4 {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px 6vw 60px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .5s cubic-bezier(.2,.7,.2,1);
+  }
+  #page4.visible { opacity: 1; pointer-events: auto; }
+
+  .open-wrap { width: 100%; max-width: 960px; }
+
+  /* 大卡片：左右分栏 */
+  .open-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 22px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 24px 64px -12px rgba(0,0,0,.45), 0 0 0 1px rgba(255,138,30,.06) inset;
+    overflow: hidden;
+    min-height: 360px;
+  }
+
+  /* 左侧：标签 + 文本框 */
+  .open-left {
+    padding: clamp(28px,4vh,44px) clamp(28px,4vw,48px);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .open-label {
+    font-size: 11px; letter-spacing: .30em; text-transform: uppercase;
+    color: rgba(128,147,176,.65); font-weight: 600;
+  }
+  .open-question {
+    font-size: clamp(14px,1.3vw,17px);
+    color: rgba(255,255,255,.82); letter-spacing: .02em; line-height: 1.55;
+  }
+  .open-textarea {
+    flex: 1; min-height: 180px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: var(--text-hi);
+    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",inherit;
+    font-size: clamp(13px,1vw,15px);
+    line-height: 1.75; letter-spacing: .02em;
+    resize: none; outline: none;
+    transition: border-color .25s, background .25s, box-shadow .25s;
+  }
+  .open-textarea::placeholder { color: rgba(128,147,176,.45); }
+  .open-textarea:focus {
+    border-color: rgba(255,138,30,.4);
+    background: rgba(255,138,30,.03);
+    box-shadow: 0 0 0 3px rgba(255,138,30,.07);
+  }
+
+  /* 分隔线 */
+  .open-divider {
+    width: 1px;
+    background: rgba(255,255,255,.09);
+    margin: 20px 0;
+  }
+
+  /* 右侧：AGENT 状态面板 */
+  .open-right {
+    width: clamp(180px,20vw,240px);
+    align-self: stretch;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px;
+    padding: 32px 20px;
+  }
+
+  /* 右侧日食环 */
+  .open-eclipse-ring {
+    position: relative;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: radial-gradient(circle,
+      transparent           0%,
+      transparent           36%,
+      rgba(140,60,0,.35)    39%,
+      rgba(215,100,0,.85)   42%,
+      rgba(255,145,5,1)     44.5%,
+      rgba(255,175,40,1)    46%,
+      rgba(255,145,5,1)     47.5%,
+      rgba(235,110,0,.85)   50%,
+      rgba(185,80,0,.52)    55%,
+      rgba(120,50,0,.24)    63%,
+      rgba(70,28,0,.09)     73%,
+      transparent           84%);
+    box-shadow:
+      0 0 14px 4px rgba(255,145,10,1),
+      0 0 38px 12px rgba(230,105,5,.6),
+      0 0 72px 28px rgba(190,78,0,.3),
+      0 0 120px 50px rgba(150,58,0,.15);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .open-eclipse-ring::after {
+    content: "";
+    position: absolute; inset: 17%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #060c1e 50%, #070d24 100%);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.95);
+  }
+  .open-eclipse-ring::before { content: none; }
+
+
+  .open-agent-tag {
+    font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+    color: rgba(128,147,176,.6); font-weight: 600;
+  }
+  .open-listening {
+    font-size: clamp(13px,1vw,15px); color: rgba(255,255,255,.75);
+    letter-spacing: .04em;
+  }
+  .open-status {
+    font-size: 12px; color: rgba(128,147,176,.55);
+    letter-spacing: .06em;
+    transition: color .3s;
+  }
+  .open-status.has-input { color: rgba(255,180,80,.75); }
+
+  /* 底部导航 */
+  .open-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 20px;
+  }
+  .open-counter {
+    font-size: 11px; letter-spacing: .22em;
+    color: rgba(128,147,176,.5); text-transform: uppercase;
+  }
+  .open-submit {
+    padding: 14px 36px; border-radius: 100px;
+    border: none; background: var(--accent-orange);
+    color: #fff; font-size: 15px; font-weight: 600;
+    letter-spacing: .05em; cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 6px 28px -4px rgba(255,138,30,.6);
+    transition: background .22s, transform .22s, box-shadow .22s;
+  }
+  .open-submit:hover {
+    background: #ff9c3a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 36px -4px rgba(255,138,30,.75);
+  }
+
+  /* 步骤点 */
+  .open-dots {
+    display: flex; gap: 6px; align-items: center;
+    justify-content: center; margin-top: 18px;
+  }
+  .open-dot {
+    height: 3px; width: 20px; border-radius: 2px;
+    background: rgba(255,255,255,.18); transition: .35s;
+  }
+  .open-dot.on { background: var(--accent-orange); width: 36px; }
+
+  /* ========== 第二页：先让我认识你 ========== */
+  #page2 {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0 6vw;
+    opacity: 0; pointer-events: none;
+    transition: opacity .55s cubic-bezier(.2,.7,.2,1);
+  }
+  #page2.visible { opacity: 1; pointer-events: auto; }
+
+  .ob-header {
+    text-align: center;
+    margin-bottom: clamp(28px, 4vh, 44px);
+    animation: none;
+  }
+  .ob-eyebrow {
+    font-size: clamp(10px, .9vw, 12px);
+    letter-spacing: .32em; text-transform: uppercase;
+    color: var(--accent-orange); margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .ob-title {
+    font-family: "Raleway", "Inter", sans-serif;
+    font-weight: 200;
+    font-size: clamp(28px, 4.2vw, 60px);
+    letter-spacing: .18em;
+    color: var(--text-hi);
+    line-height: 1.1;
+  }
+  .ob-sub {
+    margin-top: 14px;
+    font-size: clamp(12px, 1vw, 14px);
+    letter-spacing: .14em;
+    color: var(--text-low);
+  }
+
+  /* 大卡片 */
+  .ob-card {
+    width: 100%; max-width: 640px;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 24px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    padding: clamp(28px, 4vh, 48px) clamp(24px, 4vw, 48px);
+    box-shadow: 0 24px 64px -12px rgba(0,0,0,.45), 0 0 0 1px rgba(255,138,30,.06) inset;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+
+  /* 单个字段行 */
+  .ob-field {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .ob-label {
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--text-low); font-weight: 600;
+  }
+  .ob-input, .ob-select, .ob-textarea {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text-hi);
+    font-family: inherit; font-size: clamp(13px, 1vw, 15px);
+    letter-spacing: .03em;
+    outline: none;
+    transition: border-color .25s, background .25s, box-shadow .25s;
+    width: 100%;
+  }
+  .ob-input::placeholder, .ob-textarea::placeholder { color: rgba(128,147,176,.55); }
+  .ob-input:focus, .ob-select:focus, .ob-textarea:focus {
+    border-color: rgba(255,138,30,.5);
+    background: rgba(255,138,30,.04);
+    box-shadow: 0 0 0 3px rgba(255,138,30,.08);
+  }
+  .ob-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238093b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+  }
+  .ob-select option { background: #12244a; color: #fff; }
+  .ob-textarea { resize: none; height: 90px; line-height: 1.6; }
+
+  /* 两列布局（name + platform 并排） */
+  .ob-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 560px) { .ob-row { grid-template-columns: 1fr; } }
+
+  /* 底部操作区 */
+  .ob-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 4px;
+  }
+  .ob-back {
+    background: none; border: 1px solid rgba(255,255,255,.14);
+    border-radius: 100px; padding: 10px 22px;
+    color: var(--text-low); font-size: 13px; letter-spacing: .12em;
+    cursor: pointer; transition: .25s;
+  }
+  .ob-back:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+
+  .ob-next {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 30px; border-radius: 100px;
+    border: 1px solid rgba(255,138,30,.55);
+    background: rgba(255,138,30,.09);
+    color: var(--text-hi); font-size: 14px; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer;
+    transition: .25s;
+  }
+  .ob-next:hover {
+    background: rgba(255,138,30,.18);
+    border-color: rgba(255,138,30,.9);
+    box-shadow: 0 8px 28px -6px rgba(255,138,30,.35);
+    transform: translateY(-2px);
+  }
+  .ob-next .arrow { transition: transform .25s cubic-bezier(.2,.7,.2,1); }
+  .ob-next:hover .arrow { transform: translateX(5px); }
+
+  /* 进度点 */
+  .ob-dots {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: clamp(20px, 3vh, 32px);
+  }
+  .ob-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.2); transition: .3s;
+  }
+  .ob-dot.on { background: var(--accent-orange); width: 20px; border-radius: 3px; }
+
+  /* ========== 第八页：创作 Studio · Markdown 工作台 ========== */
+  #page8 {
+    position: fixed; inset: 0; z-index: 10; opacity: 0; pointer-events: none;
+    transition: opacity .5s; background: transparent; overflow-y: auto;
+  }
+  #page8.visible { opacity: 1; pointer-events: auto; }
+  .p8-wrap {
+    min-height: 100%;
+    padding: clamp(84px,10vh,104px) clamp(20px,6vw,80px) 56px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  /* —— 顶部 —— */
+  .p8-top { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .p8-top-left { display:flex; align-items:center; gap:20px; min-width:0; }
+  .p8-eyebrow { font-size:10px; letter-spacing:.30em; text-transform:uppercase; color:rgba(255,145,10,.65); font-weight:600; margin:0 0 6px; }
+  .p8-doc-title { font-family:"Raleway","PingFang SC","Inter",sans-serif; font-weight:200; font-size:clamp(22px,3vw,42px); letter-spacing:.12em; color:#fff; line-height:1.1; margin:0; }
+
+  /* 右侧操作按钮 */
+  .p8-top-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex-shrink:0; }
+  .p8-act { padding:13px 22px; border-radius:14px; font-size:14px; font-weight:600; letter-spacing:.02em; cursor:pointer; font-family:inherit; transition:.22s; white-space:nowrap; }
+  .p8-act.ghost { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.85); }
+  .p8-act.ghost:hover { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.3); color:#fff; }
+  .p8-act.solid { background:var(--accent-orange); border:1px solid transparent; color:#0a0f1e; box-shadow:0 8px 26px -6px rgba(255,138,30,.6); }
+  .p8-act.solid:hover { background:#ffa340; transform:translateY(-2px); box-shadow:0 12px 32px -6px rgba(255,138,30,.78); }
+
+  /* —— Tab 行 —— */
+  .p8-tabrow { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .p8-tabs { display:inline-flex; align-items:center; gap:6px; padding:7px; border-radius:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); backdrop-filter:blur(10px); }
+  .p8-tab { padding:11px 22px; border-radius:12px; font-size:14px; font-weight:500; letter-spacing:.02em; color:rgba(128,147,176,.9); cursor:pointer; transition:.2s; white-space:nowrap; }
+  .p8-tab:hover { color:#fff; }
+  .p8-tab.active { background:var(--accent-orange); color:#0a0f1e; font-weight:700; box-shadow:0 6px 20px -6px rgba(255,138,30,.6); }
+  .p8-backlink { background:none; border:none; color:rgba(128,147,176,.6); font-size:13px; letter-spacing:.06em; cursor:pointer; font-family:inherit; transition:.2s; padding:6px 4px; }
+  .p8-backlink:hover { color:#fff; }
+
+  /* —— 三栏工作台 —— */
+  .p8-board { display:grid; grid-template-columns:248px 1fr; gap:18px; align-items:stretch; flex:1; }
+  @media(max-width:980px){ .p8-board{grid-template-columns:1fr} }
+
+  .p8-panel { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); border-radius:20px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 24px 60px -22px rgba(0,0,0,.55); }
+  .p8-panel-h { font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:rgba(128,147,176,.7); font-weight:700; }
+
+  /* 左：大纲 + agent */
+  .p8-rail { padding:22px 22px; display:flex; flex-direction:column; }
+  .p8-outline-list { display:flex; flex-direction:column; gap:2px; margin-top:18px; }
+  .p8-onode { display:flex; align-items:center; gap:13px; padding:9px 4px; font-size:14px; color:rgba(255,255,255,.55); letter-spacing:.01em; line-height:1.4; cursor:default; transition:color .2s; font-family:"PingFang SC","Hiragino Sans GB",inherit; }
+  .p8-onode:hover { color:rgba(255,255,255,.88); }
+  .p8-onode .od { width:7px; height:7px; border-radius:50%; background:rgba(128,147,176,.42); flex-shrink:0; transition:.2s; }
+  .p8-onode.active { color:#fff; }
+  .p8-onode.active .od { background:var(--accent-orange); box-shadow:0 0 10px rgba(255,138,30,.85); }
+  .p8-rail-div { height:1px; background:rgba(255,255,255,.08); margin:20px 0; margin-top:auto; }
+  .p8-agent-h { font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:rgba(128,147,176,.55); font-weight:700; margin-bottom:15px; }
+  .p8-agent-row { display:flex; align-items:center; gap:13px; }
+  .p8-agent-spin { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,138,30,.22); border-top-color:var(--accent-orange); animation:p8spin .9s linear infinite; box-shadow:0 0 14px rgba(255,138,30,.4); }
+  @keyframes p8spin { to { transform:rotate(360deg); } }
+  .p8-agent-txt { font-size:13px; color:rgba(255,255,255,.62); letter-spacing:.02em; font-family:"PingFang SC","Hiragino Sans GB",inherit; }
+
+  /* 中+右：随 tab 切换 */
+  .p8-pane { display:none; }
+  .p8-pane.active { display:grid; }
+  .p8-pane[data-pane="md"] { grid-template-columns:1fr 372px; gap:18px; align-items:stretch; }
+  @media(max-width:1200px){ .p8-pane[data-pane="md"]{grid-template-columns:1fr} }
+
+  /* markdown 编辑器 */
+  .p8-md { padding:22px 24px; display:flex; flex-direction:column; min-height:600px; }
+  .p8-md-editor { flex:1; width:100%; min-height:520px; background:transparent; border:none; outline:none; resize:none; color:rgba(255,255,255,.88); font-family:"SF Mono",ui-monospace,Menlo,"PingFang SC",monospace; font-size:15px; line-height:2.1; letter-spacing:.01em; margin-top:18px; box-sizing:border-box; }
+  .p8-md-editor::placeholder { color:rgba(255,255,255,.2); }
+
+  /* 微信预览 */
+  .p8-prev { padding:22px 24px; display:flex; flex-direction:column; }
+  .p8-prev-stage { margin-top:18px; display:flex; justify-content:center; align-items:flex-start; flex:1; }
+  .p8-phone { width:100%; max-width:330px; border-radius:32px; padding:12px; background:linear-gradient(160deg,#1e2e54,#0d1830); border:1px solid rgba(255,255,255,.1); box-shadow:0 32px 72px -26px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.06); }
+  .p8-screen { background:#fff; border-radius:22px; overflow:hidden; max-height:640px; overflow-y:auto; }
+  .p8-screen::-webkit-scrollbar{width:0}
+  .p8-art { padding:24px 20px 32px; }
+  .p8-art-meta { font-size:12px; color:#9aa3b2; letter-spacing:.02em; margin:0 0 16px; }
+  .p8-art-meta b { color:#4a5568; font-weight:600; }
+  .p8-art-title { font-size:20px; font-weight:700; color:#1a1a1a; line-height:1.42; letter-spacing:.01em; margin:0 0 18px; font-family:"PingFang SC","Hiragino Sans GB",sans-serif; }
+  .p8-art-hero { height:172px; border-radius:10px; margin-bottom:20px; background:radial-gradient(120% 120% at 50% 38%, #22355e 0%, #16284e 45%, #0e1c3a 100%); display:flex; align-items:center; justify-content:center; }
+  .p8-hero-ring { width:62px; height:62px; border-radius:50%; position:relative; background:radial-gradient(circle,transparent 0%,transparent 36%,rgba(140,60,0,.35) 39%,rgba(215,100,0,.85) 42%,rgba(255,145,5,1) 44.5%,rgba(255,175,40,1) 46%,rgba(255,145,5,1) 47.5%,rgba(235,110,0,.85) 50%,rgba(185,80,0,.52) 55%,rgba(120,50,0,.24) 63%,transparent 80%); box-shadow:0 0 18px 5px rgba(255,145,10,.7),0 0 44px 16px rgba(230,105,5,.4); animation:pulse 4s ease-in-out infinite; }
+  .p8-hero-ring::after{content:"";position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle,#16284e 50%,#0e1c3a 100%)}
+  .p8-art-body p { font-size:15px; line-height:1.86; color:#333; margin:0 0 16px; font-family:"PingFang SC","Hiragino Sans GB",sans-serif; }
+  .p8-art-body p strong { color:#111; font-weight:700; }
+  .p8-art-cover { width:100%; display:block; border-radius:10px; margin-bottom:20px; }
+  .p8-art-lead { font-size:17px!important; font-weight:600; color:#1a1a1a!important; line-height:1.5!important; margin:0 0 18px!important; }
+  .p8-art-hr { border:none; height:1px; background:#ececec; margin:22px 0; }
+  .p8-art-body p strong { color:#111; }
+  .p8-art-body h3 { font-size:16px; font-weight:700; color:#1a1a1a; margin:24px 0 13px; padding-left:11px; border-left:3px solid var(--accent-orange); line-height:1.4; }
+
+  /* tab2 · 公众号排版 */
+  .p8-pane[data-pane="typeset"] { grid-template-columns:1fr; }
+  .p8-typeset { padding:34px clamp(20px,4vw,56px) 44px; }
+  .p8-ts-doc { max-width:660px; margin:0 auto; }
+  .p8-ts-meta { font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,145,10,.7); font-weight:600; margin-bottom:14px; }
+  .p8-ts-title { font-family:"PingFang SC","Hiragino Sans GB",sans-serif; font-size:clamp(24px,2.8vw,32px); font-weight:700; color:#fff; letter-spacing:.03em; line-height:1.35; margin:0 0 10px; }
+  .p8-ts-author { font-size:13px; color:rgba(128,147,176,.7); margin-bottom:26px; }
+  .p8-ts-hr { height:1px; background:linear-gradient(90deg,rgba(255,138,30,.5),rgba(255,138,30,0)); margin:26px 0; border:none; }
+  .p8-ts-h { display:flex; align-items:center; gap:12px; font-family:"PingFang SC","Hiragino Sans GB",sans-serif; font-size:19px; font-weight:600; color:#fff; letter-spacing:.04em; margin:30px 0 14px; }
+  .p8-ts-h .n { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px; background:rgba(255,138,30,.14); border:1px solid rgba(255,138,30,.4); color:var(--accent-orange); font-size:14px; font-weight:700; flex-shrink:0; }
+  .p8-ts-doc p { font-family:"PingFang SC","Hiragino Sans GB",sans-serif; font-size:16px; line-height:1.95; color:rgba(255,255,255,.78); margin:0 0 18px; letter-spacing:.01em; }
+  .p8-ts-doc p strong { color:#ffce92; font-weight:600; }
+  .p8-ts-quote { border-left:3px solid var(--accent-orange); background:rgba(255,138,30,.06); padding:14px 20px; border-radius:0 10px 10px 0; font-style:italic; color:rgba(255,200,150,.9)!important; margin:22px 0!important; }
+
+  /* tab3 · AI 配文 + 配图 */
+  .p8-pane[data-pane="ai"] { grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:980px){ .p8-pane[data-pane="ai"]{grid-template-columns:1fr} }
+  .p8-ai-card { padding:24px 24px 26px; }
+  .p8-ai-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .p8-ai-h .lab { font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:rgba(128,147,176,.7); font-weight:700; }
+  .p8-ai-pill { font-size:11px; padding:4px 12px; border-radius:100px; background:rgba(255,138,30,.12); border:1px solid rgba(255,138,30,.35); color:#ffb55a; letter-spacing:.06em; }
+  .p8-cap-block { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+  .p8-cap-block:last-child{margin-bottom:0}
+  .p8-cap-tag { font-size:11px; color:rgba(255,145,10,.75); letter-spacing:.1em; font-weight:600; margin-bottom:9px; }
+  .p8-cap-text { font-size:14px; line-height:1.8; color:rgba(255,255,255,.82); font-family:"PingFang SC","Hiragino Sans GB",inherit; letter-spacing:.01em; }
+  .p8-img-grid { display:flex; flex-direction:column; gap:14px; }
+  .p8-img-item { display:flex; gap:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
+  .p8-img-thumb { width:84px; height:84px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .p8-img-thumb.a { background:radial-gradient(120% 120% at 50% 40%,#22355e,#0e1c3a); }
+  .p8-img-thumb.b { background:linear-gradient(150deg,#3a2a52,#161a3a); }
+  .p8-img-thumb.c { background:linear-gradient(150deg,#52331f,#1a1226); }
+  .p8-img-ring { width:30px; height:30px; border-radius:50%; background:radial-gradient(circle,transparent 36%,rgba(255,145,5,.95) 44%,rgba(235,110,0,.7) 52%,transparent 72%); box-shadow:0 0 12px 3px rgba(255,145,10,.6); }
+  .p8-img-meta { flex:1; min-width:0; }
+  .p8-img-role { font-size:13px; font-weight:600; color:#fff; margin-bottom:6px; letter-spacing:.03em; }
+  .p8-img-prompt { font-size:12px; line-height:1.65; color:rgba(255,255,255,.55); font-family:"PingFang SC","Hiragino Sans GB",inherit; }
+
+  @media(max-width:680px){ .p8-top{flex-direction:column; align-items:flex-start;} .p8-top-actions{width:100%; justify-content:flex-start;} }
+
+    /* ========== 第九页：Evolve ========== */
+  #page9 {
+    position: fixed; inset: 0; z-index: 10; opacity: 0; pointer-events: none;
+    transition: opacity .5s; background: transparent; overflow-y: auto;
+  }
+  #page9.visible { opacity: 1; pointer-events: auto; }
+  .p9-wrap {
+    min-height: 100%;
+    padding: clamp(84px,10vh,104px) clamp(20px,6vw,80px) 56px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .p9-header { display: flex; align-items: center; gap: 24px; }
+  .p9-ring-lg {
+    width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+    position: relative;
+    background: radial-gradient(circle,
+      transparent 0%, transparent 36%,
+      rgba(140,60,0,.35) 39%, rgba(215,100,0,.85) 42%,
+      rgba(255,145,5,1) 44.5%, rgba(255,175,40,1) 46%,
+      rgba(255,145,5,1) 47.5%, rgba(235,110,0,.85) 50%,
+      rgba(185,80,0,.52) 55%, rgba(120,50,0,.24) 63%,
+      rgba(70,28,0,.09) 73%, transparent 84%);
+    box-shadow: 0 0 12px 3px rgba(255,145,10,1), 0 0 36px 11px rgba(230,105,5,.6), 0 0 68px 26px rgba(190,78,0,.3);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .p9-ring-lg::after {
+    content: ""; position: absolute; inset: 17%; border-radius: 50%;
+    background: radial-gradient(circle, #060c1e 50%, #070d24 100%);
+  }
+  .p9-title { font-family:"Raleway","PingFang SC","Inter",sans-serif; font-weight:200;
+    font-size: clamp(22px,3vw,42px); letter-spacing:.12em; color:#fff; line-height:1.1; margin: 0; }
+  .p9-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .p9-wide { grid-column: 1 / -1; }
+  @media (max-width: 800px) { .p9-grid { grid-template-columns: 1fr; } .p9-wide { grid-column: 1; } }
+  .p9-score-card, .p9-log-card, .p9-next-card, .p9-trend-card {
+    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.11);
+    border-radius: 22px; padding: 22px 24px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 24px 64px -12px rgba(0,0,0,.45), 0 0 0 1px rgba(255,138,30,.06) inset;
+  }
+  .p9-card-label {
+    font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--accent-orange); margin: 0 0 16px; opacity: .85;
+  }
+  /* Score card */
+  .p9-score-display { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+  .p9-score-ring { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+  .p9-svg { width: 100%; height: 100%; }
+  .p9-arc { transition: stroke-dashoffset 1.5s cubic-bezier(.2,.7,.2,1); }
+  .p9-score-num {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; color: var(--text-hi);
+  }
+  .p9-score-meta {}
+  .p9-score-tag { font-size: 12px; color: var(--accent-orange); font-weight: 600; margin: 0 0 6px; }
+  .p9-score-desc { font-size: 13px; color: var(--text-med); line-height: 1.6; margin: 0; }
+  .p9-score-bars { display: flex; flex-direction: column; gap: 10px; }
+  .p9-bar-item { display: flex; align-items: center; gap: 10px; }
+  .p9-bar-key { font-size: 12px; color: var(--text-med); width: 80px; flex-shrink: 0; }
+  .p9-bar-track { flex: 1; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+  .p9-bar-fill { height: 100%; background: linear-gradient(90deg, rgba(255,120,0,.8), rgba(255,175,40,.9)); border-radius: 2px; transition: width 1.4s cubic-bezier(.2,.7,.2,1); }
+  .p9-bar-val { font-size: 12px; color: var(--text-hi); font-weight: 600; width: 36px; text-align: right; }
+  /* Log card */
+  .p9-log-list { display: flex; flex-direction: column; gap: 12px; }
+  .p9-log-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.07); }
+  .p9-log-item.active { background: rgba(255,138,30,.07); border-color: rgba(255,138,30,.22); }
+  .p9-log-item.muted { opacity: .6; }
+  .p9-log-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange); flex-shrink: 0; margin-top: 5px; }
+  .p9-log-item.muted .p9-log-dot { background: rgba(255,255,255,.3); }
+  .p9-log-body { flex: 1; }
+  .p9-log-title { font-size: 13px; color: var(--text-hi); margin: 0 0 4px; line-height: 1.4; }
+  .p9-log-meta  { font-size: 11px; color: var(--text-med); margin: 0; }
+  .p9-log-badge { font-size: 10px; padding: 3px 10px; border-radius: 100px; background: rgba(255,138,30,.18); border: 1px solid rgba(255,138,30,.35); color: #ffb55a; flex-shrink: 0; align-self: flex-start; }
+  .p9-log-badge.dim { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: var(--text-med); }
+  /* Next card */
+  .p9-next-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 700px) { .p9-next-grid { grid-template-columns: 1fr; } }
+  .p9-next-item { padding: 16px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); }
+  .p9-next-num { font-size: 28px; font-weight: 900; color: rgba(255,138,30,.25); margin: 0 0 8px; line-height: 1; }
+  .p9-next-title { font-size: 14px; font-weight: 700; color: var(--text-hi); margin: 0 0 8px; }
+  .p9-next-desc  { font-size: 12px; color: var(--text-med); line-height: 1.6; margin: 0; }
+  /* Trend card */
+  .p9-trend-list { display: flex; flex-direction: column; gap: 10px; }
+  .p9-trend-item { display: flex; align-items: center; gap: 12px; }
+  .p9-trend-rank { font-size: 11px; font-weight: 700; color: rgba(255,138,30,.6); width: 22px; flex-shrink: 0; }
+  .p9-trend-title { font-size: 13px; color: var(--text-hi); width: 200px; flex-shrink: 0; }
+  .p9-trend-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+  .p9-trend-bar { height: 100%; background: linear-gradient(90deg, rgba(255,120,0,.7), rgba(255,175,40,.8)); border-radius: 2px; transition: width 1.6s cubic-bezier(.2,.7,.2,1); }
+  .p9-trend-score { font-size: 12px; color: var(--text-med); width: 50px; text-align: right; flex-shrink: 0; }
+  /* Footer */
+  .p9-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; }
+  .p9-restart-btn {
+    padding: 14px 36px; border-radius: 100px;
+    background: linear-gradient(135deg, rgba(255,120,0,.9), rgba(255,180,40,.9));
+    color: #08091a; font-size: 15px; font-weight: 700;
+    letter-spacing: .06em; border: none; cursor: pointer; transition: .25s;
+    box-shadow: 0 8px 32px -8px rgba(255,138,30,.5);
+  }
+  .p9-restart-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px -8px rgba(255,138,30,.7); }
+
+  /* ===== 第九页 · 数据闭环增强 ===== */
+  .p9-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  @media(max-width:900px){ .p9-kpis{grid-template-columns:1fr 1fr} }
+  @media(max-width:520px){ .p9-kpis{grid-template-columns:1fr} }
+  .p9k { background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.11); border-radius:18px; padding:18px 20px; box-shadow:0 20px 56px -18px rgba(0,0,0,.5); }
+  .p9k-label { font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:rgba(128,147,176,.7); font-weight:700; margin:0 0 12px; }
+  .p9k-val { font-size:clamp(28px,3vw,36px); font-weight:800; color:#fff; line-height:1; letter-spacing:.01em; }
+  .p9k-val .u { font-size:14px; font-weight:600; color:rgba(255,255,255,.45); margin-left:3px; }
+  .p9k-delta { font-size:12px; margin:9px 0 0; color:rgba(255,160,40,.95); font-weight:600; }
+  .p9k-delta.dim { color:rgba(128,147,176,.75); font-weight:500; }
+  .p9k-spark { margin-top:12px; height:34px; width:100%; display:block; }
+  .p9k-spark path.line { fill:none; stroke:var(--accent-orange); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 1.5s ease; }
+  .p9k-spark path.area { fill:url(#p9grad); opacity:0; transition:opacity 1.4s ease .35s; }
+  .p9-runner .p9k-spark path.line { stroke-dashoffset:0; }
+  .p9-runner .p9k-spark path.area { opacity:.32; }
+
+  .p9-loop { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; align-items:stretch; }
+  @media(max-width:900px){ .p9-loop{grid-template-columns:1fr} }
+
+  /* 已发布内容 */
+  .p9-pub-list { display:flex; flex-direction:column; gap:10px; }
+  .p9-pub { display:grid; grid-template-columns:1fr auto; gap:10px 16px; align-items:center; padding:14px 16px; border-radius:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); transition:.2s; }
+  .p9-pub:hover { border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.06); }
+  .p9-pub.live { background:rgba(255,138,30,.07); border-color:rgba(255,138,30,.3); }
+  .p9-pub-main { min-width:0; }
+  .p9-pub-title { font-size:14px; color:#fff; font-weight:500; line-height:1.4; margin:0 0 8px; }
+  .p9-pub-tags { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .p9-perf { font-size:10px; padding:3px 9px; border-radius:100px; letter-spacing:.04em; font-weight:600; white-space:nowrap; }
+  .p9-perf.peak { background:rgba(255,138,30,.16); border:1px solid rgba(255,138,30,.4); color:#ffb55a; }
+  .p9-perf.hot  { background:rgba(255,90,60,.14); border:1px solid rgba(255,90,60,.35); color:#ff9a7a; }
+  .p9-perf.ok   { background:rgba(110,170,255,.12); border:1px solid rgba(110,170,255,.3); color:#a9c8ff; }
+  .p9-perf.low  { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.5); }
+  .p9-perf.live { background:var(--accent-orange); border:1px solid transparent; color:#0a0f1e; }
+  .p9-pub-src { font-size:11px; color:rgba(128,147,176,.55); }
+  .p9-pub-stats { display:flex; gap:18px; }
+  .p9-stat { text-align:right; min-width:42px; }
+  .p9-stat .n { font-size:16px; font-weight:700; color:#fff; line-height:1; }
+  .p9-stat .k { font-size:10px; color:rgba(128,147,176,.6); letter-spacing:.04em; margin-top:5px; }
+  @media(max-width:560px){ .p9-pub{grid-template-columns:1fr} .p9-pub-stats{justify-content:flex-start} .p9-stat{text-align:left} }
+
+  /* Agent 进化 */
+  .p9-evo { display:flex; flex-direction:column; align-items:center; }
+  .p9-evo-ring-wrap { position:relative; width:112px; height:112px; margin:4px 0 2px; }
+  .p9-evo-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
+  .p9-evo-arc { transition:stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1); }
+  .p9-evo-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .p9-evo-num { font-size:30px; font-weight:800; color:#fff; line-height:1; }
+  .p9-evo-cap { font-size:9px; letter-spacing:.22em; color:rgba(255,145,10,.8); text-transform:uppercase; margin-top:5px; }
+  .p9-evo-sub { font-size:12px; color:rgba(255,255,255,.7); margin:9px 0 14px; text-align:center; }
+  .p9-evo-sub b { color:var(--accent-orange); }
+  .p9-evo-timeline { width:100%; }
+  .p9-evo-step { display:flex; gap:12px; padding-bottom:11px; position:relative; }
+  .p9-evo-step:last-child{ padding-bottom:0; }
+  .p9-evo-step::before { content:""; position:absolute; left:5px; top:14px; bottom:-2px; width:1px; background:rgba(255,138,30,.25); }
+  .p9-evo-step:last-child::before{ display:none; }
+  .p9-evo-dot { width:11px; height:11px; border-radius:50%; background:var(--accent-orange); flex-shrink:0; margin-top:3px; box-shadow:0 0 10px rgba(255,138,30,.7); position:relative; z-index:1; }
+  .p9-evo-step.future .p9-evo-dot { background:rgba(255,255,255,.22); box-shadow:none; }
+  .p9-evo-txt { flex:1; }
+  .p9-evo-t { font-size:13px; color:#fff; font-weight:500; margin:0 0 3px; line-height:1.4; }
+  .p9-evo-d { font-size:11px; color:rgba(128,147,176,.75); line-height:1.55; margin:0; }
+
+  /* 进化卡片：左右对称双模块 */
+  .p9-evo-2col { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center; margin-top:6px; }
+  @media (max-width:560px){ .p9-evo-2col{ grid-template-columns:1fr; gap:22px; } }
+  .p9-evo-side { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .p9-evo-2col .p9-evo-sub { margin:12px 0 0; }
+
+  /* 右侧：数据回流输入 */
+  .p9-data { align-items:stretch; gap:10px; }
+  .p9-data-title { font-size:13px; font-weight:600; color:#fff; letter-spacing:.03em; margin:0 0 2px; text-align:center; }
+  .p9-data-field { display:flex; align-items:center; gap:10px; }
+  .p9-data-field label { width:38px; flex-shrink:0; font-size:12px; color:rgba(255,145,10,.8); font-weight:600; letter-spacing:.04em; }
+  .p9-data-field input { flex:1; min-width:0; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:9px 12px; color:#fff; font-family:inherit; font-size:14px; outline:none; transition:.2s; box-sizing:border-box; -moz-appearance:textfield; }
+  .p9-data-field input::-webkit-outer-spin-button, .p9-data-field input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .p9-data-field input:focus { border-color:rgba(255,145,10,.5); background:rgba(255,145,10,.05); box-shadow:0 0 0 3px rgba(255,145,10,.08); }
+  .p9-data-field input::placeholder { color:rgba(128,147,176,.4); }
+  .p9-data-btn { margin-top:4px; padding:10px 16px; border-radius:10px; border:none; background:var(--accent-orange); color:#fff; font-size:13px; font-weight:600; letter-spacing:.04em; cursor:pointer; font-family:inherit; box-shadow:0 6px 22px -6px rgba(255,138,30,.6); transition:.2s; }
+  .p9-data-btn:hover { background:#ff9c3a; transform:translateY(-1px); }
+  .p9-data-btn.done { background:rgba(255,145,10,.18); color:rgba(255,175,60,.95); box-shadow:none; }
+  /* 看板数字回流瞬间高亮 */
+  @keyframes p9KpiBump { 0%{ color:#fff; } 30%{ color:var(--accent-glow); text-shadow:0 0 18px rgba(255,160,40,.7); } 100%{ color:#fff; text-shadow:none; } }
+  .p9k-val .bump { animation:p9KpiBump .9s ease; }
+
+  /* IP 本人手记：文本 + 语音输入 */
+  .p9-note { width:100%; margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,.08); flex:1 1 auto; display:flex; flex-direction:column; }
+  .p9-note-title { font-size:13px; font-weight:600; color:#fff; letter-spacing:.02em; margin:0 0 11px; }
+  .p9-note-title span { font-size:11px; font-weight:400; color:rgba(128,147,176,.6); margin-left:9px; letter-spacing:.02em; }
+  .p9-note-row { display:flex; gap:10px; align-items:stretch; flex:1 1 auto; }
+  .p9-note-input { flex:1; min-width:0; min-height:96px; resize:vertical; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:13px 15px; color:#fff; font-family:"PingFang SC","Hiragino Sans GB",inherit; font-size:13px; line-height:1.75; letter-spacing:.02em; outline:none; transition:.2s; box-sizing:border-box; }
+  .p9-note-input:focus { border-color:rgba(255,145,10,.5); background:rgba(255,145,10,.05); box-shadow:0 0 0 3px rgba(255,145,10,.08); }
+  .p9-note-input::placeholder { color:rgba(128,147,176,.42); }
+  .p9-note-mic { flex-shrink:0; width:50px; align-self:stretch; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04); color:rgba(255,255,255,.7); cursor:pointer; transition:.2s; display:flex; align-items:center; justify-content:center; }
+  .p9-note-mic:hover { border-color:rgba(255,145,10,.55); color:#fff; background:rgba(255,145,10,.06); }
+  .p9-note-mic.rec { border-color:rgba(255,145,10,.8); color:#ffae45; background:rgba(255,145,10,.12); animation:p9MicPulse 1.3s ease-in-out infinite; }
+  @keyframes p9MicPulse { 0%,100%{ box-shadow:0 0 0 0 rgba(255,145,10,.5); } 50%{ box-shadow:0 0 0 8px rgba(255,145,10,0); } }
+  .p9-note-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
+  .p9-note-status { font-size:11px; color:rgba(128,147,176,.6); letter-spacing:.02em; }
+  .p9-note-status.rec { color:rgba(255,165,30,.92); }
+  .p9-note-save { padding:9px 22px; border-radius:10px; border:none; background:var(--accent-orange); color:#fff; font-size:13px; font-weight:600; letter-spacing:.04em; cursor:pointer; font-family:inherit; box-shadow:0 6px 22px -6px rgba(255,138,30,.6); transition:.2s; }
+  .p9-note-save:hover { background:#ff9c3a; transform:translateY(-1px); }
+  .p9-note-save.done { background:rgba(255,145,10,.18); color:rgba(255,175,60,.95); box-shadow:none; }
+
+  /* 写作技巧库 */
+  .p9-tech-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:700px){ .p9-tech-grid{grid-template-columns:1fr; gap:14px} }
+  .p9-tech-col-h { display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#fff; margin-bottom:12px; letter-spacing:.02em; }
+  .p9-tech-col-h .ico { width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,138,30,.14); border:1px solid rgba(255,138,30,.35); color:var(--accent-orange); font-size:13px; }
+  .p9-tech-line { font-size:12px; color:rgba(255,255,255,.74); line-height:1.55; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); display:flex; gap:8px; }
+  .p9-tech-line:last-child{ border-bottom:none; }
+  .p9-tech-line .b { color:var(--accent-orange); flex-shrink:0; font-weight:700; }
+  .p9-tech-warn { color:rgba(255,150,120,.82); }
+  .p9-tech-warn .b { color:rgba(255,120,90,.95); }
+  .p9-tech-quote { font-size:12px; font-style:italic; color:rgba(255,200,150,.88); background:rgba(255,138,30,.06); border-left:2px solid rgba(255,138,30,.5); padding:9px 13px; border-radius:0 8px 8px 0; margin:9px 0; line-height:1.6; }
+
+  /* 对标柱状图 */
+  .p9-bench-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; flex-wrap:wrap; gap:6px; }
+  .p9-bench-sub { font-size:11px; color:rgba(128,147,176,.62); letter-spacing:.02em; }
+  .p9-bc-row { display:grid; grid-template-columns:210px 1fr 56px; gap:14px; align-items:center; margin-bottom:12px; }
+  @media(max-width:600px){ .p9-bc-row{grid-template-columns:1fr; gap:5px; margin-bottom:16px} }
+  .p9-bc-name { font-size:12px; color:rgba(255,255,255,.78); line-height:1.4; }
+  .p9-bc-track { height:22px; background:rgba(255,255,255,.05); border-radius:6px; overflow:hidden; }
+  .p9-bc-bar { height:100%; width:0; border-radius:6px; background:linear-gradient(90deg,rgba(255,120,0,.55),rgba(255,175,40,.88)); transition:width 1.5s cubic-bezier(.2,.7,.2,1); }
+  .p9-bc-bar.you { background:linear-gradient(90deg,rgba(110,170,255,.5),rgba(150,200,255,.85)); }
+  .p9-bc-val { font-size:13px; font-weight:700; color:#fff; text-align:right; }
+  .p9-bench-insight { margin:18px 0 0; font-size:12.5px; color:rgba(255,255,255,.72); line-height:1.75; background:rgba(255,138,30,.05); border:1px solid rgba(255,138,30,.14); border-radius:12px; padding:14px 17px; }
+  .p9-bench-insight b { color:var(--accent-orange); }
+
+  /* 演示导航 */
+  .demo-nav { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:9999; display:flex; align-items:center; gap:3px; padding:6px; border-radius:100px; background:rgba(8,15,32,.78); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 14px 44px -12px rgba(0,0,0,.7); }
+  .demo-nav .lab { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:rgba(128,147,176,.65); padding:0 9px 0 11px; font-weight:700; }
+  .demo-nav button { border:none; background:transparent; color:rgba(255,255,255,.72); font-size:12px; font-family:inherit; padding:7px 13px; border-radius:100px; cursor:pointer; transition:.2s; letter-spacing:.02em; white-space:nowrap; }
+  .demo-nav button:hover { color:#fff; background:rgba(255,255,255,.08); }
+  .demo-nav button.active { background:var(--accent-orange); color:#0a0f1e; font-weight:600; }
+  @media(max-width:560px){ .demo-nav .lab{display:none} .demo-nav button{padding:6px 9px; font-size:11px} }
+
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <linearGradient id="p9grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(255,138,30,.5)"/>
+      <stop offset="1" stop-color="rgba(255,138,30,0)"/>
+    </linearGradient>
+  </defs></svg>
+  <div class="stage" id="stage">
+    <div class="nebula" id="nebula"></div>
+    <div class="nebula b" id="nebulaB"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <nav class="topnav">
+    <div class="brand" data-nav="1"><span class="ring"></span>IP CONTENT AGENT</div>
+    <div class="nav-pill">
+      <a href="#" class="active" data-nav="1">HOME</a>
+      <a href="#" data-nav="2">ONBOARDING</a>
+      <a href="#" data-nav="7">TOPIC</a>
+      <a href="#" data-nav="8">STUDIO</a>
+      <a href="#" data-nav="9">EVOLVE</a>
+    </div>
+    <a href="#" class="login-btn">登录 / Login</a>
+  </nav>
+
+  <!-- 第五页：人格画像 -->
+  <div id="page5">
+    <!-- Phase 1: 呼吸光圈 -->
+    <div class="p5-intro" id="p5Intro">
+      <div class="p5-big-ring"></div>
+      <div class="p5-load-box">
+        <p class="p5-load-step" id="p5LoadStep">正在解析你的回答<span class="p5-dots"><i>.</i><i>.</i><i>.</i></span></p>
+        <div class="p5-load-bar"><div class="p5-load-fill" id="p5LoadFill"></div></div>
+        <p class="p5-load-sub" id="p5LoadSub">PERSONALITY ANALYSIS · 1 / 5</p>
+      </div>
+    </div>
+    <!-- Phase 2: 人格内容 -->
+    <div class="p5-content" id="p5Content">
+      <div class="p5-header">
+        <div class="p5-ring-sm"></div>
+        <div>
+          <p class="p5-eyebrow">PERSONALITY PROFILE · IP AGENT</p>
+          <h2 class="p5-name">cc</h2>
+          <p class="p5-tagline">野心翻译官</p>
+          <div class="p5-track-row">
+            <span class="p5-track-tag">女性成长</span>
+            <span class="p5-track-tag">认知提升</span>
+            <span class="p5-track-tag">情绪洞察</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p5-grid">
+        <!-- 核心价值观 -->
+        <div class="p5-card p5-c1">
+          <p class="p5-card-label">核心价值观 · CORE VALUES</p>
+          <div class="p5-value-item"><span class="p5-dot"></span><span>人不靠改变，靠自悟——他人的时间差，只能各自走、各自悟</span></div>
+          <div class="p5-value-item"><span class="p5-dot"></span><span>收回无用的共情，把善良变得有锋芒；从"等待被选择"转向"主动制定规则"</span></div>
+          <div class="p5-value-item"><span class="p5-dot"></span><span>落子即解药——空想是焦虑的温床，行动是唯一的镇定剂</span></div>
+          <div class="p5-value-item"><span class="p5-dot"></span><span>相信命运，但更相信自己；野心展露到极致，路会自己长出来</span></div>
+          <div class="p5-value-item"><span class="p5-dot"></span><span>透过现象看本质——智性上的性感，胜过任何外貌</span></div>
+        </div>
+
+        <!-- 语言人格 -->
+        <div class="p5-card p5-c2">
+          <p class="p5-card-label">语言人格 · VOICE PROFILE</p>
+          <p class="p5-tone">冷静犀利夹带狡黠自省——活人语气，像在咖啡馆和信任的朋友拆解自己；不端、不喊口号，骨子里有种笃定的锋利</p>
+          <p class="p5-sub-label">标志性表达</p>
+          <div class="p5-chips">
+            <span class="p5-chip">「其实」</span>
+            <span class="p5-chip">「我觉得」</span>
+            <span class="p5-chip">「上引号的XX」</span>
+            <span class="p5-chip">「就是」</span>
+            <span class="p5-chip">get · case · dark force</span>
+          </div>
+          <p class="p5-sub-label">忌用风格</p>
+          <div class="p5-chips">
+            <span class="p5-chip p5-chip-ban">套路反问开场</span>
+            <span class="p5-chip p5-chip-ban">密集对偶排比</span>
+            <span class="p5-chip p5-chip-ban">营销爆款腔</span>
+            <span class="p5-chip p5-chip-ban">空洞金句墙</span>
+          </div>
+        </div>
+
+        <!-- 目标读者 -->
+        <div class="p5-card p5-wide p5-c3">
+          <p class="p5-card-label">目标读者 · READER PERSONA</p>
+          <div class="p5-persona-grid">
+            <div class="p5-persona-item">
+              <p class="p5-persona-title">高压失语的年轻女性</p>
+              <p class="p5-persona-desc">年龄焦虑、野心跟不上能力、三十岁仍在"奥德赛期"找不到自我</p>
+            </div>
+            <div class="p5-persona-item">
+              <p class="p5-persona-title">有奋斗癖的自我迭代者</p>
+              <p class="p5-persona-desc">困在空想与过度反思里，需要"落子即解药"的行动框架来突破</p>
+            </div>
+            <div class="p5-persona-item">
+              <p class="p5-persona-title">中年女性 / 应对焦虑者</p>
+              <p class="p5-persona-desc">被规训、被低估，需要被翻译——"你不是有问题，你是还在路上"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 价值主张 -->
+        <div class="p5-card p5-wide p5-c4">
+          <p class="p5-card-label">价值主张 · VALUE PROPOSITION</p>
+          <div class="p5-props">
+            <div class="p5-prop">
+              <p class="p5-prop-num">01</p>
+              <p class="p5-prop-title">翻译羞耻</p>
+              <p class="p5-prop-desc">把读者长期觉得"我有问题"的处境，翻译成"你不是有问题，你是被规训/被低估/还在路上"——情绪正名</p>
+            </div>
+            <div class="p5-prop">
+              <p class="p5-prop-num">02</p>
+              <p class="p5-prop-title">落子即解药</p>
+              <p class="p5-prop-desc">看清"我有多想要"之后，行动力会自己长出来；结合真实创业/留学/体制内突围的可复用路径</p>
+            </div>
+            <div class="p5-prop">
+              <p class="p5-prop-num">03</p>
+              <p class="p5-prop-title">有锋芒的活人陪伴</p>
+              <p class="p5-prop-desc">敢承认"上引号的好女孩"、敢说"得了便宜还卖乖"——读完会忍不住在评论区讲出自己的故事</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 引导至第六页 -->
+      <div class="p5-guide-bar" id="p5GuideBar">
+        <span class="p5-guide-hint">下一步</span>
+        <button class="p5-guide-btn" id="p5ToPage6">上传文章 · 生成内容风格画像 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第六页：文章上传与风格分析 -->
+  <div id="page6">
+    <div class="p6-wrap">
+
+      <header class="p6-header">
+        <p class="p6-eyebrow">STEP 02 · CONTENT DNA</p>
+        <h2 class="p6-title">上传过往文章</h2>
+        <p class="p6-sub">Agent 将分析你的文风、惯用选题与表达特征；同时为你设定对标坐标系，产出一份内容风格画像</p>
+      </header>
+
+      <div class="p6-main">
+
+        <!-- 左：文章上传 -->
+        <div class="p6-upload-col">
+          <div class="p6-card-shell">
+            <p class="p6-section-label">过往文章 · ARTICLE UPLOAD</p>
+            <div class="p6-dropzone" id="p6Drop">
+              <div class="p6-drop-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,145,10,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <p class="p6-drop-title">拖入文件 / 点击上传</p>
+              <p class="p6-drop-hint">支持 .txt · .md · .docx · 可多选</p>
+              <input type="file" id="p6FileInput" multiple accept=".txt,.md,.docx" style="display:none"/>
+            </div>
+            <div class="p6-file-list" id="p6FileList">
+              <div class="p6-file-item p6-preloaded"><span class="p6-file-icon">📄</span><span class="p6-file-name">文章1 · 精力分配与人生波动</span><span class="p6-file-badge">已载入</span></div>
+              <div class="p6-file-item p6-preloaded"><span class="p6-file-icon">📄</span><span class="p6-file-name">文章3 · 真正的野心，是水，不是火</span><span class="p6-file-badge">已载入</span></div>
+              <div class="p6-file-item p6-preloaded"><span class="p6-file-icon">📄</span><span class="p6-file-name">文章4 · 做人做事，要学会及时转身</span><span class="p6-file-badge">已载入</span></div>
+              <div class="p6-file-item p6-preloaded"><span class="p6-file-icon">📄</span><span class="p6-file-name">文章5 · 跑步与掌控自己时间</span><span class="p6-file-badge">已载入</span></div>
+              <div class="p6-file-item p6-preloaded"><span class="p6-file-icon">📄</span><span class="p6-file-name">文章6 · 先问语境，再信道理</span><span class="p6-file-badge">已载入</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：对标账号 -->
+        <div class="p6-bench-col">
+          <div class="p6-card-shell">
+            <p class="p6-section-label">对标账号 · BENCHMARK</p>
+            <p class="p6-bench-legend">
+              <span class="p6-legend-dot good"></span>好：靠近的方向
+              <span class="p6-legend-dot mid"></span>中：参考但不复制
+              <span class="p6-legend-dot bad"></span>差：主动规避的毛病
+            </p>
+            <div class="p6-bench-add-row">
+              <input class="p6-bench-input" id="p6BenchInput" placeholder="账号 / 博主 / 公众号名称" />
+              <div class="p6-rating-group" id="p6RatingGroup">
+                <button class="p6-r-btn" data-r="好">好</button>
+                <button class="p6-r-btn" data-r="中">中</button>
+                <button class="p6-r-btn" data-r="差">差</button>
+              </div>
+              <button class="p6-add-btn" id="p6AddBtn">+ 添加</button>
+            </div>
+            <div class="p6-bench-list" id="p6BenchList">
+              <div class="p6-bench-item"><span class="p6-bench-name">谢胜子</span><span class="p6-bench-tag good">好</span><span class="p6-bench-remove" data-remove>×</span></div>
+              <div class="p6-bench-item"><span class="p6-bench-name">姚顺宇播客</span><span class="p6-bench-tag good">好</span><span class="p6-bench-remove" data-remove>×</span></div>
+              <div class="p6-bench-item"><span class="p6-bench-name">通用认知爆款号</span><span class="p6-bench-tag bad">差</span><span class="p6-bench-remove" data-remove>×</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="p6-action-bar">
+        <button class="quiz-back" id="p6Back">← 返回画像</button>
+        <button class="p6-analyze-btn" id="p6Analyze">开始分析 →</button>
+      </div>
+
+      <!-- 风格画像输出 -->
+      <div class="p6-profile-out" id="p6Profile">
+        <div class="p6-profile-header">
+          <div class="p6-ring-xs"></div>
+          <div>
+            <p class="p6-profile-eyebrow">CONTENT DNA · OUTPUT</p>
+            <p class="p6-profile-title">内容风格画像</p>
+          </div>
+        </div>
+        <div class="p6-profile-grid">
+          <div class="p6-profile-card p6-pc1">
+            <p class="p6-card-label2">文风特征 · WRITING STYLE</p>
+            <div class="p6-style-row"><span class="p6-style-key">叙述结构</span><span class="p6-style-val">事件 → 真实情绪（含不体面的）→ 提炼认知，三段式闭环</span></div>
+            <div class="p6-style-row"><span class="p6-style-key">人称切换</span><span class="p6-style-val">「我」开场铺底 → 切换「你」给读者入口 → 收口「我们」共鸣</span></div>
+            <div class="p6-style-row"><span class="p6-style-key">节奏感</span><span class="p6-style-val">短句为主，关键处留白；具体人物/作品起兴，再切入观点</span></div>
+            <div class="p6-style-row"><span class="p6-style-key">情绪基调</span><span class="p6-style-val">冷静犀利 + 狡黠自省，不热血、不喊口号，骨子里有锋利</span></div>
+          </div>
+          <div class="p6-profile-card p6-pc2">
+            <p class="p6-card-label2">惯用选题 · TOPIC PATTERNS</p>
+            <div class="p6-topic-chips">
+              <span class="p6-topic-chip">野心与行动力</span>
+              <span class="p6-topic-chip">女性主体性</span>
+              <span class="p6-topic-chip">认知框架拆解</span>
+              <span class="p6-topic-chip">精力与专注管理</span>
+              <span class="p6-topic-chip">体制内突围</span>
+              <span class="p6-topic-chip">反规训叙事</span>
+              <span class="p6-topic-chip">创业 / 黑客松</span>
+              <span class="p6-topic-chip">情绪正名</span>
+            </div>
+            <p class="p6-card-label2" style="margin-top:18px">选题公式</p>
+            <p class="p6-formula">具体人物/场景 + 反常识角度 + "高压失语"人群的处境翻译</p>
+          </div>
+          <div class="p6-profile-card p6-wide2 p6-pc3">
+            <p class="p6-card-label2">表达指纹 · EXPRESSION FINGERPRINT</p>
+            <div class="p6-fp-grid">
+              <div class="p6-fp-col">
+                <p class="p6-fp-label good-c">标志性表达 ✓</p>
+                <div class="p6-fp-chips">
+                  <span class="p6-fp-chip good-chip">「上引号的XX」反讽标记</span>
+                  <span class="p6-fp-chip good-chip">其实 / 我觉得 / 没错</span>
+                  <span class="p6-fp-chip good-chip">中英夹杂 get · case · ready</span>
+                  <span class="p6-fp-chip good-chip">得了便宜还卖乖</span>
+                  <span class="p6-fp-chip good-chip">「先___，再___」递进句式</span>
+                </div>
+              </div>
+              <div class="p6-fp-col">
+                <p class="p6-fp-label bad-c">规避风格 ✗</p>
+                <div class="p6-fp-chips">
+                  <span class="p6-fp-chip bad-chip">套路反问开场</span>
+                  <span class="p6-fp-chip bad-chip">密集排比对仗</span>
+                  <span class="p6-fp-chip bad-chip">励志口号式结尾</span>
+                  <span class="p6-fp-chip bad-chip">营销爆款腔</span>
+                  <span class="p6-fp-chip bad-chip">空洞金句墙</span>
+                </div>
+              </div>
+              <div class="p6-fp-col">
+                <p class="p6-fp-label">对标坐标系</p>
+                <div class="p6-bench-summary" id="p6BenchSummary">
+                  <div class="p6-bs-item"><span class="p6-bench-tag good">好</span><span>谢胜子 · 姚顺宇播客</span></div>
+                  <div class="p6-bs-item"><span class="p6-bench-tag bad">差</span><span>通用认知爆款号</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 进入选题引导 -->
+      <div class="p5-guide-bar" id="p6GuideBar">
+        <span class="p5-guide-hint">下一步</span>
+        <button class="p5-guide-btn" id="p6ToPage7">进入选题 · 选一个让你心动的方向 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第七页：选题 -->
+  <div id="page7">
+    <div class="p7-wrap">
+
+      <!-- 双栏主区 -->
+      <div class="p7-main">
+
+        <!-- 左：AI 推荐选题 -->
+        <div class="p7-card-shell">
+          <div class="p7-panel-head">
+            <span class="p7-panel-label">AI 推荐选题</span>
+            <div class="p7-panel-ring"></div>
+          </div>
+          <div class="p7-topic-list" id="p7TopicList"></div>
+        </div>
+
+        <!-- 右：自填选题 -->
+        <div class="p7-card-shell">
+          <p class="p7-panel-label">自填选题方向</p>
+          <p class="p7-field-label">选题 · TOPIC</p>
+          <input class="p7-custom-input" id="p7CustomInput" placeholder="例如：在中年重新开始写作，是一种什么体验" />
+          <p class="p7-field-label" style="margin-top:20px">关键词 · TAGS</p>
+          <div class="p7-tags-row" id="p7Tags">
+            <span class="p7-tag" data-tag="女性主体性">女性主体性</span>
+            <span class="p7-tag" data-tag="认知提升">认知提升</span>
+            <span class="p7-tag" data-tag="野心行动">野心行动</span>
+            <span class="p7-tag" data-tag="情绪洞察">情绪洞察</span>
+            <span class="p7-tag" data-tag="创作日常">创作日常</span>
+            <span class="p7-tag" data-tag="行业观察">行业观察</span>
+          </div>
+          <p class="p7-hint">提示：自填选题时，Agent 会结合你的人格画像与文风画像，给出方向上的建议。</p>
+        </div>
+      </div>
+
+      <!-- 底部导航 -->
+      <div class="p7-footer">
+        <button class="quiz-back" id="p7Back">← 返回</button>
+        <button class="p7-studio-btn" id="p7Studio">进入创作 Studio →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 第八页：创作 Studio · Markdown 工作台 -->
+  <div id="page8">
+    <div class="p8-wrap">
+
+      <!-- 顶部 -->
+      <header class="p8-top">
+        <div class="p8-top-left">
+          <div>
+            <p class="p8-eyebrow">STEP · STUDIO</p>
+            <h2 class="p8-doc-title">创作 Studio</h2>
+            <p class="p7-sub" id="p8TopicSub">选题已加载</p>
+          </div>
+        </div>
+        <div class="p8-top-actions">
+          <button class="p8-act ghost" id="p8Copy">复制 Markdown</button>
+          <button class="p8-act ghost" id="p8Export">导出图文</button>
+          <button class="p8-act solid" id="p8ToEvolve">发布 →</button>
+        </div>
+      </header>
+
+      <!-- Tab 行 -->
+      <div class="p8-tabrow">
+        <div class="p8-tabs" id="p8Tabs">
+          <div class="p8-tab active" data-tab="md">① Markdown 草稿</div>
+          <div class="p8-tab" data-tab="typeset">② 公众号排版</div>
+          <div class="p8-tab" data-tab="ai">③ AI 配文 + 配图</div>
+        </div>
+        <button class="p8-backlink" id="p8Back">← 返回选题</button>
+      </div>
+
+      <!-- 工作台 -->
+      <div class="p8-board">
+
+        <!-- 左：大纲 + AGENT -->
+        <aside class="p8-panel p8-rail">
+          <p class="p8-panel-h">大纲 · Outline</p>
+          <div class="p8-outline-list" id="p8OutlineItems">
+            <div class="p8-onode active"><span class="od"></span>开场：很贵的错觉</div>
+            <div class="p8-onode"><span class="od"></span>一、运气披着实力的外衣</div>
+            <div class="p8-onode"><span class="od"></span>二、运气幻觉的三条线索</div>
+            <div class="p8-onode"><span class="od"></span>三、看清真相之后怎么办</div>
+            <div class="p8-onode"><span class="od"></span>四、写给"曾经赢过"的人</div>
+            <div class="p8-onode"><span class="od"></span>写在最后</div>
+          </div>
+          <div class="p8-rail-div"></div>
+          <p class="p8-agent-h">Agent</p>
+          <div class="p8-agent-row">
+            <div class="p8-agent-spin"></div>
+            <span class="p8-agent-txt">正在按你的文风改写…</span>
+          </div>
+        </aside>
+
+        <!-- Tab1：Markdown + 微信预览 -->
+        <div class="p8-pane active" data-pane="md">
+          <section class="p8-panel p8-md">
+            <p class="p8-panel-h">Markdown</p>
+            <textarea class="p8-md-editor" id="p8Editor" spellcheck="false"># 人最大的内耗，是把运气误认为实力
+
+# 把运气当实力,是一种很贵的错觉
+
+我惊讶于当时的自己怎么会有这种想法——明明是蒙对的,却讲出了一副"我早就看穿"的语气。典型的得了便宜还卖乖。
+
+后来我才发现,**人最大的内耗,不是不够努力,而是把运气误认为实力,然后用那个虚高的自我评估,反复为难当下的自己**。
+
+你有过这种时刻吗?
+
+某次项目做成了,你以为是自己的判断精准;某段关系稳定下来,你以为是自己的经营有方;某笔投资赚了钱,你以为是自己的认知变现。春风得意马蹄疾,一夜看尽长安花——然后呢?
+
+然后你用同一个模型,去做下一个决策。再然后,摔了。
+
+**你不会怀疑模型本身有问题,你只会怀疑"我是不是不够努力""我是不是状态不好""我是不是最近懈怠了"。**
+
+内耗就这么来了。
+
+---
+
+## 一、运气披着实力的外衣,最像那么回事
+
+运气这东西,最狡猾的地方在于——**它兑现的方式,和实力一模一样**。
+
+都是结果导向。都是你做了A,然后得到了B。外人看不出来,你自己也分不清。
+
+我有个朋友,几年前踩中了一个行业风口,两年时间从普通员工做到部门负责人。她是真的以为自己是"天选打工人",直到行业收缩,她用同样的方法论、同样的努力程度,再也复制不出那个结果。
+
+她崩溃了整整半年。
+
+不是因为失去了那个位置,而是因为**她引以为傲的那个"自己",好像从来没有存在过**。
+
+这就是把运气当实力的代价:你以为你拥有的一切,其实只是借来的。当运气收回去的时候,你连自己是谁都不知道了。
+
+(也没有非常惨,但总体看还是残酷的,无奈jpg。)
+
+---
+
+## 二、识别"运气幻觉"的三条线索
+
+**第一条:这个结果,换一个人、换一个时间,还能复现吗?**
+
+实力的特征是可复现性。运气的特征是——它发生在特定的时空缝隙里,换条缝就没了。
+
+如果你仔细复盘,发现"当年做成那件事"靠的是某个不可控的外部条件(政策、关系、偶然的时机),那请老实承认:那是运气。
+
+承认不丢人。**把运气当成实力,然后在下一个周期里惩罚自己,才丢人。**
+
+**第二条:你享受的是"赢",还是"赢的感觉"?**
+
+实力派享受的是过程——解题的快感、迭代的踏实、做对一件复杂事情之后那种"我懂了"的通透感。
+
+运气派享受的是结果——那个数字、那个头衔、那个被人看见的瞬间。
+
+如果你发现自己越来越难从过程中获得满足,只有结果才能刺激你,那大概率是:你已经在用运气的回报,喂养一个"实力型自我"的幻觉了。
+
+**第三条:你愿不愿意把方法论讲给一个"没有你当时那些运气"的人听?**
+
+这一条最狠。
+
+如果你的方法论,只有在你拥有当时那些特定条件(资源、人脉、时机)时才成立,那它就不是方法论,它是事后编的故事。
+
+真正的实力,是**剥离掉运气之后,还能稳定输出的那部分**。
+
+---
+
+## 三、看清真相之后,怎么办?
+
+第一步:**给成功一个"运气系数"。**
+
+不是让你凡尔赛,也不是让你虚伪地谦虚。是让你建立一个真实的自我评估系统。
+
+我后来学会了一个很笨但很有用的方法——每次拿到一个还不错的成果,我会强迫自己问一句:**"如果把这件事里所有运气成分拿掉,我真实的贡献是什么?"**
+
+问完之后,通常会从8分变成5分。有点扎心,但**这个5分,才是你真正可以带到下一场的东西**。
+
+第二步:**用"反脆弱"的标准,重新定义"实力"。**
+
+什么叫实力?不是你顺风能飞多高,而是**你逆风能走多远**。
+
+运气消失后,你还能不能保持基本盘?能不能从零开始重建?能不能在没有人脉、没有资源、没有那个风口的情况下,依然找到一条路?
+
+能,那才是实力。不能,那只是运气加成的剧本。
+
+第三步:**把"我很厉害"换成"我很幸运,并且我还在努力"。**
+
+这句话说出来,不是示弱,是**把自己从"必须永远赢"的诅咒里解放出来**。
+
+承认运气,不是否定努力,而是——**给努力一个更公平的位置**。你不需要靠"我永远都对"来证明自己值得,你只需要"我一直在做对的事,剩下交给概率"。
+
+这才是成年人该有的成熟。
+
+---
+
+## 四、写给那些"曾经赢过"的人
+
+我知道这篇文章可能会让一些人不太舒服。
+
+尤其是那些——曾经踩中过什么、曾经被人羡慕过、曾经也以为自己"天生就是这块料"的人。
+
+你会觉得我在泼冷水。你会觉得"难道承认自己有运气,就是否定自己吗?"
+
+不是的。
+
+**承认运气,是放过自己。**
+
+放过那个"我必须永远维持那个高度"的自己;放过那个"一旦失手就觉得自己一无是处"的自己;放过那个"用一次成功给自己贴了一辈子标签"的自己。
+
+你不需要一直赢,你才值得被爱。你也不需要"我全靠实力"这种话术,来证明自己配得上现在的位置。
+
+**多幸运(笑),多骄(沙)傲(雕),多么的需要继续努力——这才是完整的真相。**
+
+---
+
+## 写在最后
+
+把运气当实力,最危险的不是"高估自己",而是——**它会让你在运气退潮的时候,彻底否定自己**。
+
+你以为你是海,其实你只是赶上了一场潮。
+
+但这不重要。
+
+**重要的是:潮水退去之后,你还愿不愿意、还有没有能力,继续做那片海?**
+
+看清运气的成分,不是为了让你变得谦卑,是为了让你在下一个周期里——**能稳稳地接住属于自己的那份,也能平静地看着不属于自己的那份流走。**
+
+这才是"实力"真正该有的样子。</textarea>
+          </section>
+
+          <section class="p8-panel p8-prev">
+            <p class="p8-panel-h">实时预览 · Wechat</p>
+            <div class="p8-prev-stage">
+              <div class="p8-phone">
+                <div class="p8-screen">
+                  <article class="p8-art">
+                    <p class="p8-art-meta"><b>野心翻译官</b> 的 IP · 5 分钟前</p>
+                    <h1 class="p8-art-title">人最大的内耗，是把运气误认为实力</h1>
+                    <img class="p8-art-cover" src="cover-croissant.png" alt="封面图" />
+                    <div class="p8-art-body">
+                      <p class="p8-art-lead">把运气当实力,是一种很贵的错觉</p>
+                      <p>我惊讶于当时的自己怎么会有这种想法——明明是蒙对的,却讲出了一副"我早就看穿"的语气。典型的得了便宜还卖乖。</p>
+                      <p>后来我才发现,<strong>人最大的内耗,不是不够努力,而是把运气误认为实力,然后用那个虚高的自我评估,反复为难当下的自己</strong>。</p>
+                      <p>你有过这种时刻吗?</p>
+                      <p>某次项目做成了,你以为是自己的判断精准;某段关系稳定下来,你以为是自己的经营有方;某笔投资赚了钱,你以为是自己的认知变现。春风得意马蹄疾,一夜看尽长安花——然后呢?</p>
+                      <p>然后你用同一个模型,去做下一个决策。再然后,摔了。</p>
+                      <p><strong>你不会怀疑模型本身有问题,你只会怀疑"我是不是不够努力""我是不是状态不好""我是不是最近懈怠了"。</strong></p>
+                      <p>内耗就这么来了。</p>
+                      <hr class="p8-art-hr"/>
+                      <h3>一、运气披着实力的外衣,最像那么回事</h3>
+                      <p>运气这东西,最狡猾的地方在于——<strong>它兑现的方式,和实力一模一样</strong>。</p>
+                      <p>都是结果导向。都是你做了A,然后得到了B。外人看不出来,你自己也分不清。</p>
+                      <p>我有个朋友,几年前踩中了一个行业风口,两年时间从普通员工做到部门负责人。她是真的以为自己是"天选打工人",直到行业收缩,她用同样的方法论、同样的努力程度,再也复制不出那个结果。</p>
+                      <p>她崩溃了整整半年。</p>
+                      <p>不是因为失去了那个位置,而是因为<strong>她引以为傲的那个"自己",好像从来没有存在过</strong>。</p>
+                      <p>这就是把运气当实力的代价:你以为你拥有的一切,其实只是借来的。当运气收回去的时候,你连自己是谁都不知道了。</p>
+                      <p>(也没有非常惨,但总体看还是残酷的,无奈jpg。)</p>
+                      <hr class="p8-art-hr"/>
+                      <h3>二、识别"运气幻觉"的三条线索</h3>
+                      <p><strong>第一条:这个结果,换一个人、换一个时间,还能复现吗?</strong></p>
+                      <p>实力的特征是可复现性。运气的特征是——它发生在特定的时空缝隙里,换条缝就没了。</p>
+                      <p>如果你仔细复盘,发现"当年做成那件事"靠的是某个不可控的外部条件(政策、关系、偶然的时机),那请老实承认:那是运气。</p>
+                      <p>承认不丢人。<strong>把运气当成实力,然后在下一个周期里惩罚自己,才丢人。</strong></p>
+                      <p><strong>第二条:你享受的是"赢",还是"赢的感觉"?</strong></p>
+                      <p>实力派享受的是过程——解题的快感、迭代的踏实、做对一件复杂事情之后那种"我懂了"的通透感。</p>
+                      <p>运气派享受的是结果——那个数字、那个头衔、那个被人看见的瞬间。</p>
+                      <p>如果你发现自己越来越难从过程中获得满足,只有结果才能刺激你,那大概率是:你已经在用运气的回报,喂养一个"实力型自我"的幻觉了。</p>
+                      <p><strong>第三条:你愿不愿意把方法论讲给一个"没有你当时那些运气"的人听?</strong></p>
+                      <p>这一条最狠。</p>
+                      <p>如果你的方法论,只有在你拥有当时那些特定条件(资源、人脉、时机)时才成立,那它就不是方法论,它是事后编的故事。</p>
+                      <p>真正的实力,是<strong>剥离掉运气之后,还能稳定输出的那部分</strong>。</p>
+                      <hr class="p8-art-hr"/>
+                      <h3>三、看清真相之后,怎么办?</h3>
+                      <p>第一步:<strong>给成功一个"运气系数"。</strong></p>
+                      <p>不是让你凡尔赛,也不是让你虚伪地谦虚。是让你建立一个真实的自我评估系统。</p>
+                      <p>我后来学会了一个很笨但很有用的方法——每次拿到一个还不错的成果,我会强迫自己问一句:<strong>"如果把这件事里所有运气成分拿掉,我真实的贡献是什么?"</strong></p>
+                      <p>问完之后,通常会从8分变成5分。有点扎心,但<strong>这个5分,才是你真正可以带到下一场的东西</strong>。</p>
+                      <p>第二步:<strong>用"反脆弱"的标准,重新定义"实力"。</strong></p>
+                      <p>什么叫实力?不是你顺风能飞多高,而是<strong>你逆风能走多远</strong>。</p>
+                      <p>运气消失后,你还能不能保持基本盘?能不能从零开始重建?能不能在没有人脉、没有资源、没有那个风口的情况下,依然找到一条路?</p>
+                      <p>能,那才是实力。不能,那只是运气加成的剧本。</p>
+                      <p>第三步:<strong>把"我很厉害"换成"我很幸运,并且我还在努力"。</strong></p>
+                      <p>这句话说出来,不是示弱,是<strong>把自己从"必须永远赢"的诅咒里解放出来</strong>。</p>
+                      <p>承认运气,不是否定努力,而是——<strong>给努力一个更公平的位置</strong>。你不需要靠"我永远都对"来证明自己值得,你只需要"我一直在做对的事,剩下交给概率"。</p>
+                      <p>这才是成年人该有的成熟。</p>
+                      <hr class="p8-art-hr"/>
+                      <h3>四、写给那些"曾经赢过"的人</h3>
+                      <p>我知道这篇文章可能会让一些人不太舒服。</p>
+                      <p>尤其是那些——曾经踩中过什么、曾经被人羡慕过、曾经也以为自己"天生就是这块料"的人。</p>
+                      <p>你会觉得我在泼冷水。你会觉得"难道承认自己有运气,就是否定自己吗?"</p>
+                      <p>不是的。</p>
+                      <p><strong>承认运气,是放过自己。</strong></p>
+                      <p>放过那个"我必须永远维持那个高度"的自己;放过那个"一旦失手就觉得自己一无是处"的自己;放过那个"用一次成功给自己贴了一辈子标签"的自己。</p>
+                      <p>你不需要一直赢,你才值得被爱。你也不需要"我全靠实力"这种话术,来证明自己配得上现在的位置。</p>
+                      <p><strong>多幸运(笑),多骄(沙)傲(雕),多么的需要继续努力——这才是完整的真相。</strong></p>
+                      <hr class="p8-art-hr"/>
+                      <h3>写在最后</h3>
+                      <p>把运气当实力,最危险的不是"高估自己",而是——<strong>它会让你在运气退潮的时候,彻底否定自己</strong>。</p>
+                      <p>你以为你是海,其实你只是赶上了一场潮。</p>
+                      <p>但这不重要。</p>
+                      <p><strong>重要的是:潮水退去之后,你还愿不愿意、还有没有能力,继续做那片海?</strong></p>
+                      <p>看清运气的成分,不是为了让你变得谦卑,是为了让你在下一个周期里——<strong>能稳稳地接住属于自己的那份,也能平静地看着不属于自己的那份流走。</strong></p>
+                      <p>这才是"实力"真正该有的样子。</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Tab2：公众号排版 -->
+        <div class="p8-pane" data-pane="typeset">
+          <section class="p8-panel p8-typeset">
+            <div class="p8-ts-doc">
+              <p class="p8-ts-meta">野心翻译官 · 深度长文</p>
+              <h1 class="p8-ts-title">人最大的内耗，是把运气误认为实力</h1>
+              <p class="p8-ts-author">把运气当实力，是一种很贵的错觉</p>
+              <hr class="p8-ts-hr"/>
+              <p>我惊讶于当时的自己怎么会有这种想法——明明是蒙对的，却讲出了一副"我早就看穿"的语气。典型的得了便宜还卖乖。</p>
+              <p>后来我才发现，<strong>人最大的内耗，不是不够努力，而是把运气误认为实力</strong>，然后用那个虚高的自我评估，反复为难当下的自己。</p>
+              <p class="p8-ts-quote">你不会怀疑模型本身有问题，你只会怀疑"我是不是不够努力"。内耗就这么来了。</p>
+              <div class="p8-ts-h"><span class="n">一</span>运气披着实力的外衣，最像那么回事</div>
+              <p>运气这东西，最狡猾的地方在于——<strong>它兑现的方式，和实力一模一样</strong>。都是结果导向，外人看不出来，你自己也分不清。</p>
+              <div class="p8-ts-h"><span class="n">二</span>识别"运气幻觉"的三条线索</div>
+              <p>第一条，换个人换个时间还能复现吗？第二条，你享受的是"赢"还是"赢的感觉"？第三条，你愿不愿意把方法论讲给一个没有你当时运气的人听？<strong>真正的实力，是剥离掉运气之后，还能稳定输出的那部分。</strong></p>
+            </div>
+          </section>
+        </div>
+
+        <!-- Tab3：AI 配文 + 配图 -->
+        <div class="p8-pane" data-pane="ai">
+          <section class="p8-panel p8-ai-card">
+            <div class="p8-ai-h">
+              <span class="lab">推荐配文 · Caption</span>
+              <span class="p8-ai-pill">已按你的语气生成</span>
+            </div>
+            <div class="p8-cap-block">
+              <p class="p8-cap-tag">朋友圈短文案</p>
+              <p class="p8-cap-text">把运气当实力，是一种很贵的错觉。它不会让你高估自己一时，而是会在运气退潮的时候，让你彻底否定自己。今天聊聊怎么给成功一个"运气系数"。</p>
+            </div>
+            <div class="p8-cap-block">
+              <p class="p8-cap-tag">导语 / 摘要</p>
+              <p class="p8-cap-text">实力的特征是可复现性，运气的特征是只发生在特定的时空缝隙里。识别它，不是为了谦卑，而是为了下一个周期里稳稳接住属于自己的那份。</p>
+            </div>
+            <div class="p8-cap-block">
+              <p class="p8-cap-tag">话题标签</p>
+              <p class="p8-cap-text">#自我成长　#反内耗　#认知觉醒　#野心翻译官</p>
+            </div>
+          </section>
+
+          <section class="p8-panel p8-ai-card">
+            <div class="p8-ai-h">
+              <span class="lab">封面 + 配图 · Prompt</span>
+              <span class="p8-ai-pill">3 张</span>
+            </div>
+            <div class="p8-img-grid">
+              <div class="p8-img-item">
+                <div class="p8-img-thumb a"><div class="p8-img-ring"></div></div>
+                <div class="p8-img-meta">
+                  <p class="p8-img-role">封面图</p>
+                  <p class="p8-img-prompt">深蓝夜空中一轮日食光环，孤独而克制，中央留白放标题，电影感冷调氛围。</p>
+                </div>
+              </div>
+              <div class="p8-img-item">
+                <div class="p8-img-thumb b"></div>
+                <div class="p8-img-meta">
+                  <p class="p8-img-role">配图 ①</p>
+                  <p class="p8-img-prompt">退潮后的海岸线，湿沙上残留浪痕，隐喻"潮水退去之后"，极简留白。</p>
+                </div>
+              </div>
+              <div class="p8-img-item">
+                <div class="p8-img-thumb c"></div>
+                <div class="p8-img-meta">
+                  <p class="p8-img-role">配图 ②</p>
+                  <p class="p8-img-prompt">天平的一端是骰子、一端是砝码，暖光打在砝码上，象征运气与实力的称量。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+    <!-- 第九页：Evolve 进化 -->
+  <div id="page9">
+    <div class="p9-wrap">
+      <header class="p9-header">
+        <div class="p9-ring-lg"></div>
+        <div class="p9-header-text">
+          <p class="p7-eyebrow">EVOLVE · 数据闭环</p>
+          <h2 class="p9-title">你的 IP 正在进化</h2>
+          <p class="p7-sub">每一次发布，都会回流成 Agent 更懂你的依据 · 越用越懂你</p>
+        </div>
+      </header>
+
+      <!-- 关键指标 KPI -->
+      <div class="p9-kpis">
+        <div class="p9k">
+          <p class="p9k-label">累计阅读 · Reads</p>
+          <div class="p9k-val"><span id="p9KpiReads" data-count="743">0</span></div>
+          <p class="p9k-delta" id="p9KpiReadsDelta">↑ 367 本周峰值</p>
+          <svg class="p9k-spark" viewBox="0 0 100 34" preserveAspectRatio="none">
+            <path class="area" d="M0,28 L17,30 L34,22 L51,24 L68,14 L85,16 L100,4 L100,34 L0,34 Z"/>
+            <path class="line" pathLength="1" d="M0,28 L17,30 L34,22 L51,24 L68,14 L85,16 L100,4"/>
+          </svg>
+        </div>
+        <div class="p9k">
+          <p class="p9k-label">互动总量 · Engagement</p>
+          <div class="p9k-val"><span id="p9KpiEngage" data-count="77">0</span></div>
+          <p class="p9k-delta dim" id="p9KpiEngageDelta">赞 29 · 转 33 · 评 15</p>
+          <svg class="p9k-spark" viewBox="0 0 100 34" preserveAspectRatio="none">
+            <path class="area" d="M0,26 L20,20 L40,25 L60,12 L80,17 L100,6 L100,34 L0,34 Z"/>
+            <path class="line" pathLength="1" d="M0,26 L20,20 L40,25 L60,12 L80,17 L100,6"/>
+          </svg>
+        </div>
+        <div class="p9k">
+          <p class="p9k-label">粉丝 · Followers</p>
+          <div class="p9k-val"><span data-count="128">0</span></div>
+          <p class="p9k-delta">↑ 12 近 7 天</p>
+          <svg class="p9k-spark" viewBox="0 0 100 34" preserveAspectRatio="none">
+            <path class="area" d="M0,30 L25,27 L50,22 L75,14 L100,6 L100,34 L0,34 Z"/>
+            <path class="line" pathLength="1" d="M0,30 L25,27 L50,22 L75,14 L100,6"/>
+          </svg>
+        </div>
+        <div class="p9k">
+          <p class="p9k-label">进化指数 · Evolve</p>
+          <div class="p9k-val"><span data-count="78">0</span><span class="u">/100</span></div>
+          <p class="p9k-delta">进化中 · Growing</p>
+          <svg class="p9k-spark" viewBox="0 0 100 34" preserveAspectRatio="none">
+            <path class="area" d="M0,32 L20,27 L40,24 L60,16 L80,12 L100,5 L100,34 L0,34 Z"/>
+            <path class="line" pathLength="1" d="M0,32 L20,27 L40,24 L60,16 L80,12 L100,5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 已发布内容 + Agent 进化 -->
+      <div class="p9-loop">
+        <div class="p9-log-card">
+          <p class="p9-card-label">已发布内容 · Published</p>
+          <div class="p9-pub-list">
+            <div class="p9-pub live">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">人最大的内耗，是把运气误认为实力</p>
+                <div class="p9-pub-tags"><span class="p9-perf live">刚发布 · 采集中</span><span class="p9-pub-src">公众号 · 今日</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">312</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">24</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">9</div><div class="k">评论</div></div>
+              </div>
+            </div>
+            <div class="p9-pub">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">精力分配 与 人生波动</p>
+                <div class="p9-pub-tags"><span class="p9-perf peak">账号峰值</span><span class="p9-pub-src">公众号 · 文章1</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">367</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">10</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">5</div><div class="k">评论</div></div>
+              </div>
+            </div>
+            <div class="p9-pub">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">一个很绝的判断力：先问语境，再信道理</p>
+                <div class="p9-pub-tags"><span class="p9-perf hot">高互动率</span><span class="p9-pub-src">AI 协作 · 文章6</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">49</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">6</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">4</div><div class="k">评论</div></div>
+              </div>
+            </div>
+            <div class="p9-pub">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">做人做事 要学会及时转身</p>
+                <div class="p9-pub-tags"><span class="p9-perf ok">评论活跃</span><span class="p9-pub-src">公众号 · 文章4</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">94</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">3</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">6</div><div class="k">评论</div></div>
+              </div>
+            </div>
+            <div class="p9-pub">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">真正的野心，是水，不是火</p>
+                <div class="p9-pub-tags"><span class="p9-perf low">平淡</span><span class="p9-pub-src">AI 协作 · 文章3</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">86</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">2</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">0</div><div class="k">评论</div></div>
+              </div>
+            </div>
+            <div class="p9-pub">
+              <div class="p9-pub-main">
+                <p class="p9-pub-title">能向卓越靠近一点点，也是非常美好的事</p>
+                <div class="p9-pub-tags"><span class="p9-perf low">冷启动</span><span class="p9-pub-src">公众号 · 文章2</span></div>
+              </div>
+              <div class="p9-pub-stats">
+                <div class="p9-stat"><div class="n">58</div><div class="k">阅读</div></div>
+                <div class="p9-stat"><div class="n">3</div><div class="k">赞·在看</div></div>
+                <div class="p9-stat"><div class="n">0</div><div class="k">评论</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p9-log-card p9-evo">
+          <p class="p9-card-label" style="align-self:flex-start">Agent 进化 · 越用越懂你</p>
+          <div class="p9-evo-2col">
+            <!-- 左：进化指数 -->
+            <div class="p9-evo-side">
+              <div class="p9-evo-ring-wrap">
+                <svg viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="7"/>
+                  <circle class="p9-evo-arc" cx="50" cy="50" r="44" fill="none" stroke="rgba(255,145,10,.92)"
+                    stroke-width="7" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="276" data-off="61"/>
+                </svg>
+                <div class="p9-evo-center">
+                  <div class="p9-evo-num" data-count="78">0</div>
+                  <div class="p9-evo-cap">Evolve</div>
+                </div>
+              </div>
+              <p class="p9-evo-sub">已回流 <b>6 篇</b>数据<br>沉淀 <b>11 项</b>写作技巧</p>
+            </div>
+
+            <!-- 右：手动回流新数据 -->
+            <div class="p9-evo-side p9-data" id="p9DataInput">
+              <p class="p9-data-title">回流新数据</p>
+              <div class="p9-data-field">
+                <label>阅读</label>
+                <input type="number" id="p9InReads" min="0" placeholder="0" />
+              </div>
+              <div class="p9-data-field">
+                <label>点赞</label>
+                <input type="number" id="p9InLikes" min="0" placeholder="0" />
+              </div>
+              <div class="p9-data-field">
+                <label>互动</label>
+                <input type="number" id="p9InInter" min="0" placeholder="0" />
+              </div>
+              <button class="p9-data-btn" id="p9DataApply">同步到看板</button>
+            </div>
+          </div>
+
+          <!-- IP 本人手记：对这篇文章的真实感受 -->
+          <div class="p9-note">
+            <p class="p9-note-title">这篇你自己怎么看？<span>把真实感受写给 Agent · 它会据此校准</span></p>
+            <div class="p9-note-row">
+              <textarea id="p9NoteText" class="p9-note-input"
+                placeholder="例如：这篇有点 AI 味，第三段结构有点散，金句可以再密一点，开头那个钩子我挺喜欢…"></textarea>
+              <button class="p9-note-mic" id="p9NoteMic" type="button" title="语音输入" aria-label="语音输入">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/>
+                </svg>
+              </button>
+            </div>
+            <div class="p9-note-foot">
+              <span class="p9-note-status" id="p9NoteStatus"></span>
+              <button class="p9-note-save" id="p9NoteSave" type="button">同步给 Agent</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 学到的写作技巧 -->
+      <div class="p9-trend-card p9-wide">
+        <p class="p9-card-label">Agent 学到的写作技巧 · Technique Bank　<span style="color:rgba(128,147,176,.5);letter-spacing:0">来自 cc · 肥猫 · 已沉淀 11 项</span></p>
+        <div class="p9-tech-grid">
+          <div>
+            <div class="p9-tech-col-h"><span class="ico">♪</span>节奏控制 · Rhythm</div>
+            <div class="p9-tech-line"><span class="b">·</span>中长段铺陈 + 短句金句交替</div>
+            <div class="p9-tech-line"><span class="b">·</span>中段（80–150 字）约 60%，短句收尾约 30%</div>
+            <div class="p9-tech-quote">"你学会停顿，你就开始为自己的人生做主"</div>
+            <div class="p9-tech-line p9-tech-warn"><span class="b">⚠</span>短句过密且全押韵，会失去「活人聊天」的自然气口</div>
+          </div>
+          <div>
+            <div class="p9-tech-col-h"><span class="ico">◎</span>互动设计 · Engagement</div>
+            <div class="p9-tech-line"><span class="b">·</span>高对话感 + 清单化自检（设问约 8 次 / 篇）</div>
+            <div class="p9-tech-line"><span class="b">·</span>每千字 3–4 句「可截图」短句</div>
+            <div class="p9-tech-line"><span class="b">·</span>清单自检：处境 → 前提 → 是否成立</div>
+            <div class="p9-tech-line p9-tech-warn"><span class="b">⚠</span>设问勿停留修辞层，需给读者可对号入座的具体处境</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 对标账号 -->
+      <div class="p9-trend-card p9-wide">
+        <div class="p9-bench-head">
+          <p class="p9-card-label" style="margin:0">对标 · 肥猫说财（财经认知 IP）</p>
+          <span class="p9-bench-sub">阅读量对比 · Agent 正用其结构优化你的开头与金句密度</span>
+        </div>
+        <div class="p9-bc-row">
+          <span class="p9-bc-name">永远不要和服务你的人做朋友</span>
+          <div class="p9-bc-track"><div class="p9-bc-bar" data-w="100%"></div></div>
+          <span class="p9-bc-val">3.4万</span>
+        </div>
+        <div class="p9-bc-row">
+          <span class="p9-bc-name">提升看透事物本质的能力</span>
+          <div class="p9-bc-track"><div class="p9-bc-bar" data-w="44%"></div></div>
+          <span class="p9-bc-val">1.5万</span>
+        </div>
+        <div class="p9-bc-row">
+          <span class="p9-bc-name">这是 AI 时代，人类最后的尊严</span>
+          <div class="p9-bc-track"><div class="p9-bc-bar" data-w="24%"></div></div>
+          <span class="p9-bc-val">7975</span>
+        </div>
+        <div class="p9-bc-row">
+          <span class="p9-bc-name">进步最快的方式：对自己绝对坦诚</span>
+          <div class="p9-bc-track"><div class="p9-bc-bar" data-w="16%"></div></div>
+          <span class="p9-bc-val">5289</span>
+        </div>
+        <div class="p9-bc-row">
+          <span class="p9-bc-name" style="color:#a9c8ff">你 · 近 6 篇均阅读</span>
+          <div class="p9-bc-track"><div class="p9-bc-bar you" data-w="3%"></div></div>
+          <span class="p9-bc-val">124</span>
+        </div>
+        <p class="p9-bench-insight">对标账号篇均阅读 <b>1.5 万+</b>，你的起点是 <b>124</b>——差距不在努力，在<b>结构与钩子</b>。Agent 已拆解其 4 篇爆款的开头悬念与金句墙，正逐步迁移到你的草稿里。</p>
+      </div>
+
+      <div class="p9-footer">
+        <button class="quiz-back" id="p9Back">← 返回 Studio</button>
+        <button class="p9-restart-btn" id="p9Restart">开始下一篇创作 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第四页：开放问答 -->
+  <div id="page4">
+    <div class="open-wrap">
+      <div class="open-card">
+        <div class="open-left">
+          <p class="open-label">TELL ME ABOUT YOURSELF</p>
+          <p class="open-question" id="openQuestion"></p>
+          <textarea class="open-textarea" id="openTextarea" rows="7"></textarea>
+        </div>
+        <div class="open-divider"></div>
+        <div class="open-right">
+          <div class="open-eclipse-ring"></div>
+          <p class="open-agent-tag">AGENT</p>
+          <p class="open-listening">正在聆听...</p>
+          <p class="open-status" id="openStatus">尚未输入</p>
+        </div>
+      </div>
+      <div class="open-footer">
+        <div>
+          <button class="quiz-back" id="openBack">← 上一步</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:24px;">
+          <span class="open-counter" id="openCounter">01 / 03</span>
+          <button class="open-submit" id="openSubmit">下一题 →</button>
+        </div>
+      </div>
+      <div class="open-dots" id="openDots"></div>
+    </div>
+  </div>
+
+  <!-- 第三页：人格问卷 -->
+  <div id="page3">
+    <div class="quiz-wrap">
+      <div class="quiz-card">
+        <p class="quiz-counter" id="quizCounter">QUESTION 1 / 6</p>
+        <h2 class="quiz-question" id="quizQuestion"></h2>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-nav">
+          <button class="quiz-back" id="quizBack">← 上一题</button>
+          <button class="quiz-next" id="quizNext" disabled>下一题 →</button>
+        </div>
+      </div>
+      <div class="quiz-progress" id="quizProgress"></div>
+    </div>
+  </div>
+
+  <!-- 第二页：先让我认识你 -->
+  <div id="page2">
+    <div class="ob-header">
+      <p class="ob-eyebrow">ONBOARDING · 01</p>
+      <h2 class="ob-title">先让我认识你</h2>
+      <p class="ob-sub">告诉我你是谁，我们一起进化</p>
+    </div>
+
+    <div class="ob-card">
+      <div class="ob-row">
+        <div class="ob-field">
+          <label class="ob-label">你的名字</label>
+          <input class="ob-input" type="text" placeholder="你希望我怎么称呼你？" />
+        </div>
+        <div class="ob-field">
+          <label class="ob-label">你的身份 / 行业</label>
+          <select class="ob-select">
+            <option value="" disabled selected>选择你的领域</option>
+            <option>创作者 / 博主</option>
+            <option>品牌 / 企业</option>
+            <option>电商 / 零售</option>
+            <option>科技 / SaaS</option>
+            <option>教育 / 知识付费</option>
+            <option>金融 / 投资</option>
+            <option>媒体 / 公关</option>
+            <option>其他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ob-field">
+        <label class="ob-label">主要内容平台</label>
+        <select class="ob-select">
+          <option value="" disabled selected>你主要活跃在哪里？</option>
+          <option>小红书</option>
+          <option>抖音 / TikTok</option>
+          <option>微信公众号</option>
+          <option>B站 / YouTube</option>
+          <option>微博 / Twitter · X</option>
+          <option>LinkedIn</option>
+          <option>多平台运营</option>
+        </select>
+      </div>
+
+      <div class="ob-field">
+        <label class="ob-label">你的 IP 定位 · 你在创作什么？</label>
+        <textarea class="ob-textarea" placeholder="例如：我是一个分享职场成长与效率工具的博主，受众是 25–35 岁的职场新人…"></textarea>
+      </div>
+
+      <div class="ob-actions">
+        <button class="ob-back" id="ob-backBtn">← 返回</button>
+        <button class="ob-next" id="ob-nextBtn">
+          <span>开始进化</span>
+          <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ob-dots">
+      <span class="ob-dot on"></span>
+      <span class="ob-dot"></span>
+      <span class="ob-dot"></span>
+    </div>
+  </div>
+
+  <main class="hero" id="hero">
+    <p class="label">IP Content Agent</p>
+
+    <h1 class="headline" id="headline" aria-label="EVOLVE YOUR CONTENT">
+      <span class="word" data-word="EVOLVE"></span>
+      <span class="gap"></span>
+      <span class="word">
+        <span class="char">Y</span><span class="eclipse" id="eclipse" aria-hidden="true"></span><span class="char">U</span><span class="char">R</span>
+      </span>
+      <span class="gap"></span>
+      <span class="word" data-word="CONTENT"></span>
+    </h1>
+
+    <div class="cn-block">
+      <p class="cn-title">让你的内容自我进化</p>
+      <p class="cn-tag">先<b>认识你</b> · 再<b>为你创作</b> · 用真实数据，与你共同<b>进化</b></p>
+    </div>
+
+    <div class="actions">
+      <button class="enter-btn" id="enterBtn">
+        <span class="glow"></span>
+        <span>开始你的进化 · Enter</span>
+        <span class="arrow">→</span>
+      </button>
+      <div class="scroll-hint">
+        <span>Enter</span>
+        <span class="chev"></span>
+      </div>
+    </div>
+
+  </main>
+
+  <button class="sound-toggle hint" id="soundToggle" aria-label="环境音 Ambient" title="环境音 · Ambient">
+    <span class="sound-bars"><i></i><i></i><i></i><i></i></span>
+    <span class="sound-label" id="soundLabel">声音 · 关</span>
+  </button>
+
+<script>
+  /* 逐字生成 + 入场动画 */
+  (function buildWords() {
+    document.querySelectorAll('.word[data-word]').forEach((w, wi) => {
+      [...w.dataset.word].forEach((ch, i) => {
+        const s = document.createElement('span');
+        s.className = 'char';
+        s.textContent = ch;
+        w.appendChild(s);
+      });
+    });
+    // 给所有 char 设置依次延迟
+    document.querySelectorAll('.headline .char').forEach((c, i) => {
+      c.style.animationDelay = (0.5 + i * 0.045) + 's';
+    });
+    const ec = document.getElementById('eclipse');
+    ec.style.opacity = 0;
+    ec.style.animationDelay = '0s';
+    setTimeout(() => { ec.style.transition = 'opacity 1s ease'; ec.style.opacity = 1; }, 1100);
+  })();
+
+  /* ---------- 指针交互 ---------- */
+  const dot = document.createElement('div'); dot.className = 'cursor-dot';
+  const ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.append(dot, ring);
+
+  const glow = document.getElementById('cursorGlow');
+  const nebula = document.getElementById('nebula');
+  const nebulaB = document.getElementById('nebulaB');
+  const headline = document.getElementById('headline');
+  const eclipse = document.getElementById('eclipse');
+  const enterBtn = document.getElementById('enterBtn');
+
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let rx = mx, ry = my;          // ring 缓动
+  let gx = mx, gy = my;          // glow 缓动
+
+  window.addEventListener('pointermove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%,-50%)`;
+
+    // 视差：背景与标题随指针轻移
+    const dxn = (mx / window.innerWidth - .5);
+    const dyn = (my / window.innerHeight - .5);
+    headline.style.transform = `translate(${dxn * -16}px, ${dyn * -10}px)`;
+
+    // 靠近日食光环时增强 + 自定义指针变 hot
+    const ec = eclipse.getBoundingClientRect();
+    const ecx = ec.left + ec.width / 2, ecy = ec.top + ec.height / 2;
+    const dist = Math.hypot(mx - ecx, my - ecy);
+    if (dist < 140) {
+      ring.classList.add('hot');
+      eclipse.style.transform = `scale(${1 + (140 - dist) / 700})`;
+      eclipse.style.boxShadow = '0 0 28px 8px rgba(255,148,10,1), 0 0 72px 26px rgba(240,110,5,.8), 0 0 140px 52px rgba(200,85,0,.46), 0 0 220px 90px rgba(160,65,0,.24)';
+    } else {
+      ring.classList.remove('hot');
+      eclipse.style.transform = '';
+      eclipse.style.boxShadow = '';
+    }
+  });
+
+  // 背景视差（用 transform 叠加在动画之上会冲突，改用单独的包装层位移）
+  const stage = document.getElementById('stage');
+  window.addEventListener('pointermove', (e) => {
+    const dx = (e.clientX / window.innerWidth - .5) * 18;
+    const dy = (e.clientY / window.innerHeight - .5) * 18;
+    stage.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+
+  // 按钮内发光跟随指针
+  enterBtn.addEventListener('pointermove', (e) => {
+    const r = enterBtn.getBoundingClientRect();
+    enterBtn.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    enterBtn.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+  const hero   = document.getElementById('hero');
+  const page2  = document.getElementById('page2');
+  const obBack = document.getElementById('ob-backBtn');
+  const obNext = document.getElementById('ob-nextBtn');
+
+  function goToPage2() {
+    hero.style.transition = 'opacity .45s ease';
+    hero.style.opacity = '0';
+    hero.style.pointerEvents = 'none';
+    if (typeof ambientScope === 'function') ambientScope(false);
+    setTimeout(() => {
+      hero.style.display = 'none';
+      page2.classList.add('visible');
+    }, 420);
+  }
+
+  function goToPage1() {
+    page2.classList.remove('visible');
+    if (typeof ambientScope === 'function') ambientScope(true);
+    setTimeout(() => {
+      hero.style.display = '';
+      hero.style.opacity = '0';
+      requestAnimationFrame(() => {
+        hero.style.opacity = '1';
+        hero.style.pointerEvents = '';
+      });
+    }, 300);
+  }
+
+  enterBtn.addEventListener('click', goToPage2);
+  document.querySelector('.scroll-hint').addEventListener('click', goToPage2);
+  obBack.addEventListener('click', goToPage1);
+  obNext.addEventListener('click', goToPage3);
+
+  /* ========== 第三页：人格问卷 ========== */
+  const QUIZ = [
+    {
+      q: '你最想写给谁看？',
+      opts: ['高压环境中的年轻女性', '想自我迭代的奋斗者', '中年女性 / 应对焦虑', '创作者 / IP 同路人']
+    },
+    {
+      q: '在内容创作中，你更看重哪一点？',
+      opts: ['真诚的个人表达', '深度的行业洞察', '实用的方法论', '情绪与共鸣']
+    },
+    {
+      q: '你想基于哪类真实经历来创作？',
+      opts: ['转折与醒悟的关键时刻', '迷失期与重新出发', '野心外露、为目标硬拼', '关系与人际的领悟']
+    },
+    {
+      q: '你的表达风格更接近哪种？',
+      opts: ['短句直白，说人话', '思辨感强，有逻辑', '带点文艺，有画面感', '中英夹杂，轻松自然']
+    },
+    {
+      q: '你有没有一个反复在讲的核心观点？',
+      opts: ['有，而且很明确', '有个模糊方向，还没成形', '暂时没有，帮我从经历里提炼', '我的核心观点就是"反套路"']
+    },
+    {
+      q: '有没有你绝对不会碰的话题？',
+      opts: ['不讲个人理财 / 投资', '情感内容克制，不作主线', 'IP 与职业身份完全分开', '暂时没有明确禁区']
+    }
+  ];
+
+  const page3   = document.getElementById('page3');
+  const qCounter = document.getElementById('quizCounter');
+  const qQuestion = document.getElementById('quizQuestion');
+  const qOptions  = document.getElementById('quizOptions');
+  const qProgress = document.getElementById('quizProgress');
+  const qBack    = document.getElementById('quizBack');
+  const qNext    = document.getElementById('quizNext');
+
+  let quizIdx = 0;
+  const answers = new Array(QUIZ.length).fill(null);
+
+  function renderQuiz() {
+    const total = QUIZ.length;
+    const q = QUIZ[quizIdx];
+    qCounter.textContent = `QUESTION ${quizIdx + 1} / ${total}`;
+    qQuestion.textContent = q.q;
+
+    qOptions.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt' + (answers[quizIdx] === i ? ' selected' : '');
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        answers[quizIdx] = i;
+        qOptions.querySelectorAll('.quiz-opt').forEach((b, bi) => {
+          b.classList.toggle('selected', bi === i);
+        });
+        qNext.disabled = false;
+      });
+      qOptions.appendChild(btn);
+    });
+
+    qNext.disabled = answers[quizIdx] === null;
+    qNext.textContent = quizIdx < total - 1 ? '下一题 →' : '完成 ✓';
+    qBack.style.visibility = quizIdx === 0 ? 'hidden' : 'visible';
+
+    qProgress.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('span');
+      d.className = 'quiz-prog-dot' + (i === quizIdx ? ' on' : '');
+      qProgress.appendChild(d);
+    }
+  }
+
+  function goToPage3() {
+    page2.classList.remove('visible');
+    setTimeout(() => {
+      quizIdx = 0;
+      renderQuiz();
+      page3.classList.add('visible');
+    }, 300);
+  }
+
+  function goToPage2fromQuiz() {
+    page3.classList.remove('visible');
+    setTimeout(() => { page2.classList.add('visible'); }, 300);
+  }
+
+  qBack.addEventListener('click', () => {
+    if (quizIdx === 0) { goToPage2fromQuiz(); return; }
+    quizIdx--;
+    renderQuiz();
+  });
+
+  qNext.addEventListener('click', () => {
+    if (quizIdx < QUIZ.length - 1) {
+      quizIdx++;
+      renderQuiz();
+    } else {
+      goToPage4();
+    }
+  });
+
+  /* ========== 第四页：开放问答 ========== */
+  const OPEN_QS = [
+    {
+      label: '真实经历 · 维度 05',
+      q: '给我讲一件你真实经历过、印象很深的事——发生了什么就行，先别急着总结。\n这件事里，有没有一个你"不太好意思承认"的情绪？',
+      placeholder: '那件事是这样的……我当时的真实感受是……'
+    },
+    {
+      label: '人生关键节点 · 维度 02',
+      q: '顺着时间捋一捋——从小到现在，有哪几个对你影响最大的节点？\n出身背景、重要转折、迷失期、达成后的茫然……都可以。',
+      placeholder: '大概是在……那段时间发生了……它让我意识到……'
+    },
+    {
+      label: '语感与金句 · 维度 06 · 07',
+      q: '说说你最近在思考的事，写作时的状态，或者一段你最喜欢的自己写过的话。\n有没有一句你反复对别人说、或反复对自己说的话？',
+      placeholder: '最近一直在想……我常常会说的一句话是……'
+    }
+  ];
+
+  const page4      = document.getElementById('page4');
+  const openQ      = document.getElementById('openQuestion');
+  const openTA     = document.getElementById('openTextarea');
+  const openStatus = document.getElementById('openStatus');
+  const openBack   = document.getElementById('openBack');
+  const openSubmit = document.getElementById('openSubmit');
+  const openCounter= document.getElementById('openCounter');
+  const openDots   = document.getElementById('openDots');
+
+  let openIdx = 0;
+  const openAnswers = new Array(OPEN_QS.length).fill('');
+
+  function renderOpen() {
+    const total = OPEN_QS.length;
+    const item  = OPEN_QS[openIdx];
+    openQ.textContent   = item.q;
+    openTA.placeholder  = item.placeholder;
+    openTA.value        = openAnswers[openIdx];
+    openCounter.textContent = `0${openIdx + 1} / 0${total}`;
+    openSubmit.textContent = openIdx < total - 1 ? '下一题 →' : '提交并生成画像 →';
+    openBack.style.visibility = openIdx === 0 ? 'hidden' : 'visible';
+
+    const hasText = openTA.value.trim().length > 0;
+    openStatus.textContent = hasText ? `已输入 ${openTA.value.trim().length} 字` : '尚未输入';
+    openStatus.classList.toggle('has-input', hasText);
+
+    openDots.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('span');
+      d.className = 'open-dot' + (i === openIdx ? ' on' : '');
+      openDots.appendChild(d);
+    }
+  }
+
+  openTA.addEventListener('input', () => {
+    openAnswers[openIdx] = openTA.value;
+    const len = openTA.value.trim().length;
+    openStatus.textContent = len > 0 ? `已输入 ${len} 字` : '尚未输入';
+    openStatus.classList.toggle('has-input', len > 0);
+  });
+
+  function goToPage4() {
+    page3.classList.remove('visible');
+    setTimeout(() => {
+      openIdx = 0;
+      renderOpen();
+      page4.classList.add('visible');
+    }, 300);
+  }
+
+  function goToPage3fromOpen() {
+    page4.classList.remove('visible');
+    setTimeout(() => {
+      quizIdx = QUIZ.length - 1;
+      renderQuiz();
+      page3.classList.add('visible');
+    }, 300);
+  }
+
+  openBack.addEventListener('click', () => {
+    openAnswers[openIdx] = openTA.value;
+    if (openIdx === 0) { goToPage3fromOpen(); return; }
+    openIdx--;
+    renderOpen();
+  });
+
+  openSubmit.addEventListener('click', () => {
+    openAnswers[openIdx] = openTA.value;
+    if (openIdx < OPEN_QS.length - 1) {
+      openIdx++;
+      renderOpen();
+      openTA.focus();
+    } else {
+      openSubmit.textContent = '生成中...';
+      openSubmit.disabled = true;
+      openSubmit.style.background = 'rgba(255,145,10,.6)';
+      setTimeout(goToPage5, 800);
+    }
+  });
+
+  /* ========== 第五页：人格画像 ========== */
+  const page5    = document.getElementById('page5');
+  const p5Intro  = document.getElementById('p5Intro');
+  const p5Content= document.getElementById('p5Content');
+
+  // 加载阶段轮播文案
+  const P5_LOAD_STEPS = [
+    '正在解析你的回答',
+    '提取语言人格与表达习惯',
+    '构建价值观与判断坐标',
+    '校准语气 · 还原「活人感」',
+    '生成你的专属人格画像'
+  ];
+  const P5_STEP_GAP = 1300;                              // 每步停留时长（ms）
+  const P5_LOAD_TOTAL = P5_LOAD_STEPS.length * P5_STEP_GAP; // 总加载时长 ≈ 6.5s
+  const P5_DOTS = '<span class="p5-dots"><i>.</i><i>.</i><i>.</i></span>';
+  let p5LoadTimer = null;
+
+  function runP5Loading() {
+    const stepEl = document.getElementById('p5LoadStep');
+    const fillEl = document.getElementById('p5LoadFill');
+    const subEl  = document.getElementById('p5LoadSub');
+    let i = 0;
+    const render = (n) => {
+      if (fillEl) fillEl.style.width = Math.round(((n + 1) / P5_LOAD_STEPS.length) * 100) + '%';
+      if (subEl)  subEl.textContent = 'PERSONALITY ANALYSIS · ' + (n + 1) + ' / ' + P5_LOAD_STEPS.length;
+      if (!stepEl) return;
+      stepEl.classList.add('swap');                      // 先淡出
+      setTimeout(() => {
+        stepEl.innerHTML = P5_LOAD_STEPS[n] + P5_DOTS;
+        stepEl.classList.remove('swap');                 // 再淡入
+      }, 280);
+    };
+    if (stepEl) stepEl.innerHTML = P5_LOAD_STEPS[0] + P5_DOTS;
+    if (fillEl) fillEl.style.width = '20%';
+    if (subEl)  subEl.textContent = 'PERSONALITY ANALYSIS · 1 / ' + P5_LOAD_STEPS.length;
+    clearInterval(p5LoadTimer);
+    p5LoadTimer = setInterval(() => {
+      i++;
+      if (i < P5_LOAD_STEPS.length) render(i);
+      else clearInterval(p5LoadTimer);
+    }, P5_STEP_GAP);
+  }
+
+  function goToPage5() {
+    page4.classList.remove('visible');
+    setTimeout(() => {
+      page5.classList.add('visible');
+      runP5Loading();
+      // 加载文案轮播结束后光圈淡出，内容展开
+      setTimeout(() => {
+        clearInterval(p5LoadTimer);
+        p5Intro.classList.add('hidden');
+        p5Content.classList.add('revealed');
+        // 卡片依次错落出现
+        const delays = [0, 120, 260, 420];
+        document.querySelectorAll('.p5-c1,.p5-c2,.p5-c3,.p5-c4').forEach((c, i) => {
+          setTimeout(() => c.classList.add('show'), delays[i] || 0);
+        });
+        // 引导按钮在卡片出现后展示
+        setTimeout(() => {
+          const gb = document.getElementById('p5GuideBar');
+          if (gb) gb.classList.add('show');
+        }, 700);
+      }, P5_LOAD_TOTAL);
+    }, 300);
+  }
+
+  /* ========== 第六页：文章上传 & 风格分析 ========== */
+  const page6       = document.getElementById('page6');
+  const p5ToPage6Btn= document.getElementById('p5ToPage6');
+  const p6Back      = document.getElementById('p6Back');
+  const p6Analyze   = document.getElementById('p6Analyze');
+  const p6Profile   = document.getElementById('p6Profile');
+  const p6Drop      = document.getElementById('p6Drop');
+  const p6FileInput = document.getElementById('p6FileInput');
+  const p6FileList  = document.getElementById('p6FileList');
+  const p6BenchInput= document.getElementById('p6BenchInput');
+  const p6BenchList = document.getElementById('p6BenchList');
+  const p6AddBtn    = document.getElementById('p6AddBtn');
+  const p6BenchSummary = document.getElementById('p6BenchSummary');
+
+  let selectedRating = '好';
+  document.getElementById('p6RatingGroup').querySelectorAll('.p6-r-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.p6-r-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedRating = btn.dataset.r;
+    });
+  });
+  // 默认选中"好"
+  document.querySelector('.p6-r-btn[data-r="好"]').classList.add('selected');
+
+  // 添加对标账号
+  p6AddBtn.addEventListener('click', () => {
+    const name = p6BenchInput.value.trim();
+    if (!name) return;
+    const cls = selectedRating === '好' ? 'good' : selectedRating === '中' ? 'mid' : 'bad';
+    const item = document.createElement('div');
+    item.className = 'p6-bench-item';
+    item.innerHTML = `<span class="p6-bench-name">${name}</span><span class="p6-bench-tag ${cls}">${selectedRating}</span><span class="p6-bench-remove">×</span>`;
+    item.querySelector('.p6-bench-remove').addEventListener('click', () => item.remove());
+    p6BenchList.appendChild(item);
+    p6BenchInput.value = '';
+  });
+  // 预设条目的删除
+  p6BenchList.querySelectorAll('.p6-bench-remove').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.p6-bench-item').remove());
+  });
+
+  // 点击上传区
+  p6Drop.addEventListener('click', () => p6FileInput.click());
+  p6Drop.addEventListener('dragover', e => { e.preventDefault(); p6Drop.style.borderColor='rgba(255,145,10,.8)'; });
+  p6Drop.addEventListener('dragleave', () => { p6Drop.style.borderColor=''; });
+  p6Drop.addEventListener('drop', e => {
+    e.preventDefault(); p6Drop.style.borderColor='';
+    handleFiles(e.dataTransfer.files);
+  });
+  p6FileInput.addEventListener('change', () => handleFiles(p6FileInput.files));
+  function handleFiles(files) {
+    [...files].forEach(f => {
+      const item = document.createElement('div');
+      item.className = 'p6-file-item';
+      item.innerHTML = `<span class="p6-file-icon">📄</span><span class="p6-file-name">${f.name}</span><span class="p6-file-badge">已载入</span>`;
+      p6FileList.appendChild(item);
+    });
+  }
+
+  // 分析按钮
+  p6Analyze.addEventListener('click', () => {
+    p6Analyze.textContent = '分析中...';
+    p6Analyze.disabled = true;
+    p6Analyze.style.background = 'rgba(255,145,10,.5)';
+    // 更新对标摘要
+    const items = [...p6BenchList.querySelectorAll('.p6-bench-item')];
+    if (items.length) {
+      p6BenchSummary.innerHTML = '';
+      ['好','中','差'].forEach(tier => {
+        const cls = tier === '好' ? 'good' : tier === '中' ? 'mid' : 'bad';
+        const names = items.filter(i => i.querySelector('.p6-bench-tag').textContent === tier).map(i => i.querySelector('.p6-bench-name').textContent);
+        if (names.length) {
+          const d = document.createElement('div');
+          d.className = 'p6-bs-item';
+          d.innerHTML = `<span class="p6-bench-tag ${cls}">${tier}</span><span>${names.join(' · ')}</span>`;
+          p6BenchSummary.appendChild(d);
+        }
+      });
+    }
+    setTimeout(() => {
+      p6Analyze.textContent = '分析完成 ✓';
+      p6Analyze.style.background = 'rgba(80,200,120,.85)';
+      p6Profile.classList.add('revealed');
+      const pcards = document.querySelectorAll('.p6-pc1,.p6-pc2,.p6-pc3');
+      pcards.forEach((c, i) => setTimeout(() => c.classList.add('show'), i * 150));
+      p6Profile.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 2200);
+  });
+
+  // 页面跳转
+  function goToPage6() {
+    page5.classList.remove('visible');
+    setTimeout(() => { page6.classList.add('visible'); }, 300);
+  }
+  function goToPage5fromSix() {
+    page6.classList.remove('visible');
+    setTimeout(() => { page5.classList.add('visible'); }, 300);
+  }
+  p5ToPage6Btn.addEventListener('click', goToPage6);
+  p6Back.addEventListener('click', goToPage5fromSix);
+
+  // page6 分析完成后显示引导
+  const p6GuideBar   = document.getElementById('p6GuideBar');
+  const p6ToPage7Btn = document.getElementById('p6ToPage7');
+
+  /* ========== 第七页：选题 ========== */
+  const TOPICS = [
+    { title:'"好女人等待被选择，坏女人主动制定规则"', viewpoint:'等待被选择不是温柔，是把自己活成货架上的商品；主动定规则，才是真正的自由。', source:'选题库', heat:92 },
+    { title:'"懂事"是最毒的夸奖——好女孩的隐形枷锁', viewpoint:'被夸"懂事"的女孩，本质是提前学会了用讨好换安全感，代价是活成别人的需求清单。', source:'热点话题', heat:88 },
+    { title:'女人最该升级的认知，是承认自己贪', viewpoint:'所谓格局大，不过是你终于不骂自己想赢。', source:'选题库', heat:85 },
+    { title:'"我配得上"，是中年女人最贵的认知', viewpoint:'你卡住的不是能力，是不敢要的羞耻感。', source:'选题库', heat:83 },
+    { title:'高认知女人，从不在亲密关系里讲道理', viewpoint:'在爱的人面前"正确"，是一种新型控制。', source:'选题库', heat:79 },
+    { title:'黄多多深V照被骂——社会只许女孩"乖"不许她有性张力', viewpoint:'骂黄多多的不是父亲，是一整套不允许女孩拥有自主性张力的审美道德。', source:'热点话题', heat:76 },
+    { title:'女性成长号最爱的「自我提升」，正是困住你的笼子', viewpoint:'成长不是向上爬，是敢承认「我不想变好」的时刻。', source:'选题库', heat:74 },
+    { title:'独自旅行不是逃离——是女人拿回身体主权的方式', viewpoint:'独自旅行的意义不是看世界，是在没有熟人评价的真空里，重新认识自己的欲望和边界。', source:'热点话题', heat:71 },
+    { title:'柳青谈女性成长：越成功的女人，越在假装松弛', viewpoint:'「从容优雅」是被规训出来的表演，野心才是真底色。', source:'选题库', heat:68 },
+    { title:'真正厉害的女人，早把"清零"留给情绪了', viewpoint:'外部可以共存或清零，内心只能动态清零。', source:'选题库', heat:65 },
+  ];
+
+  const page7 = document.getElementById('page7');
+  const p7Back = document.getElementById('p7Back');
+  const p7Studio = document.getElementById('p7Studio');
+  const p7TopicList = document.getElementById('p7TopicList');
+  const p7Tags = document.getElementById('p7Tags');
+  const p7CustomInput = document.getElementById('p7CustomInput');
+
+  let selectedTopicIdx = -1;
+
+  function buildTopics() {
+    p7TopicList.innerHTML = '';
+    TOPICS.forEach((t, i) => {
+      const card = document.createElement('div');
+      card.className = 'p7-topic-card' + (i === selectedTopicIdx ? ' selected' : '');
+      card.innerHTML = `
+        <div class="p7-tc-left">
+          <p class="p7-tc-title">${t.title}</p>
+          <p class="p7-tc-source">来源 · ${t.source}</p>
+        </div>
+        <div class="p7-heat"><span class="p7-flame">🔥</span>${t.heat}</div>`;
+      card.addEventListener('click', () => {
+        selectedTopicIdx = i;
+        p7TopicList.querySelectorAll('.p7-topic-card').forEach((c, ci) => c.classList.toggle('selected', ci === i));
+        p7CustomInput.value = '';
+      });
+      p7TopicList.appendChild(card);
+    });
+  }
+
+  // tag toggle
+  p7Tags.querySelectorAll('.p7-tag').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+
+  // clear topic selection if user types custom
+  p7CustomInput.addEventListener('input', () => {
+    if (p7CustomInput.value.trim()) {
+      selectedTopicIdx = -1;
+      p7TopicList.querySelectorAll('.p7-topic-card').forEach(c => c.classList.remove('selected'));
+    }
+  });
+
+  function goToPage7() {
+    page6.classList.remove('visible');
+    setTimeout(() => {
+      buildTopics();
+      page7.classList.add('visible');
+    }, 300);
+  }
+  function goToPage6fromSeven() {
+    page7.classList.remove('visible');
+    setTimeout(() => { page6.classList.add('visible'); }, 300);
+  }
+
+  if (p6ToPage7Btn) p6ToPage7Btn.addEventListener('click', goToPage7);
+  p7Back.addEventListener('click', goToPage6fromSeven);
+  p7Studio.addEventListener('click', () => {
+    const hasCard   = selectedTopicIdx >= 0;
+    const hasCustom = p7CustomInput && p7CustomInput.value.trim().length > 0;
+    if (!hasCard && !hasCustom) {
+      p7Studio.textContent = '请先选择一个选题';
+      setTimeout(() => { p7Studio.textContent = '进入创作 Studio →'; }, 1800);
+      return;
+    }
+    goToPage8();
+  });
+
+  // ===== 第八页：Studio =====
+  const page8 = document.getElementById('page8');
+  const page9 = document.getElementById('page9');
+  const p8TopicText = document.getElementById('p8TopicText');
+  const p8Generate  = document.getElementById('p8Generate');
+  const p8Regen     = document.getElementById('p8Regen');
+  const p8GenLabel  = document.getElementById('p8GenLabel');
+  const p8GenRing   = document.getElementById('p8GenRing');
+  const p8Outline   = document.getElementById('p8Outline');
+  const p8OutlineItems = document.getElementById('p8OutlineItems');
+  const p8Editor    = document.getElementById('p8Editor');
+  const p8CharCount = document.getElementById('p8CharCount');
+  const p8Copy      = document.getElementById('p8Copy');
+  const p8Export    = document.getElementById('p8Export');
+  const p8Back      = document.getElementById('p8Back');
+  const p8ToEvolve  = document.getElementById('p8ToEvolve');
+  const p9Back      = document.getElementById('p9Back');
+  const p9Restart   = document.getElementById('p9Restart');
+  const p9LogTitle  = document.getElementById('p9LogTitle');
+
+  const DRAFT_OUTLINE = [
+    '开头：用真实场景切入，不用反问',
+    '一：拆解"好女孩"规训的本质',
+    '二：我的经历——"坏女人"如何定义规则',
+    '三：给读者的台阶——情绪正名',
+    '结尾：开口缺口，留评论空间'
+  ];
+
+  const DRAFT_TEXT = `上周和朋友聊天，她说她妈妈夸她"好懂事"。
+
+她笑了笑，但我从她眼里看出来——她一点都不高兴。
+
+懂事，是这个社会给女孩贴的最温柔的枷锁。它的意思是：你要少说话、少要求、少占位置。它的意思是：你的感受是二等的，先把别人照顾好再说。
+
+"好女人等待被选择，坏女人主动制定规则。"
+
+我花了很多年才明白，我不想做一个好女人。
+
+不是因为我想变坏——而是因为"好"这个字，从来就不是为了我设计的。它是为了让我方便别人而设计的。
+
+所以我开始学着做一个制定规则的人。不是暴力的那种规则，是：我知道我要什么，我说出来，我去拿。
+
+这个转变很难，因为有一个声音一直在说："你这样太自私了。"
+
+但我发现，那个说我自私的声音，从来不会说同样的话给男人听。
+
+你有没有过类似的经历？留言讲讲。`;
+
+  function goToPage8() {
+    const topic = selectedTopicIdx >= 0 ? TOPICS[selectedTopicIdx] : null;
+    const customText = p7CustomInput ? p7CustomInput.value.trim() : '';
+    const topicTitle = topic ? topic.title : (customText || '暂无选题');
+    if (p8TopicText) p8TopicText.textContent = topicTitle;
+    const p8Sub = document.getElementById('p8TopicSub');
+    if (p8Sub) p8Sub.textContent = topicTitle;
+    if (p9LogTitle)  p9LogTitle.textContent  = topicTitle;
+    page7.classList.remove('visible');
+    setTimeout(() => { page8.classList.add('visible'); }, 300);
+  }
+
+  function goToPage9() {
+    page8.classList.remove('visible');
+    setTimeout(() => {
+      page9.classList.add('visible');
+      setDemoActive(9);
+      setTimeout(animateP9, 220);
+    }, 300);
+  }
+
+  function goToPage7fromEight() {
+    page8.classList.remove('visible');
+    setTimeout(() => { page7.classList.add('visible'); }, 300);
+  }
+
+  function goToPage8fromNine() {
+    page9.classList.remove('visible');
+    setTimeout(() => { page8.classList.add('visible'); }, 300);
+  }
+
+  let generatedOnce = false;
+
+  function startGenerate() {
+    p8Generate.style.display = 'none';
+    p8Regen.disabled = true;
+    p8GenRing.classList.add('spinning');
+    p8GenLabel.textContent = 'AI 正在创作中…';
+    p8Outline.style.display = 'none';
+    p8Editor.value = '';
+    updateCharCount();
+
+    const steps = ['分析人格锚点…', '匹配文风基因…', '构建文章结构…', '生成初稿…'];
+    let si = 0;
+    const iv = setInterval(() => {
+      if (si < steps.length) { p8GenLabel.textContent = steps[si++]; }
+    }, 600);
+
+    setTimeout(() => {
+      clearInterval(iv);
+      p8GenRing.classList.remove('spinning');
+      p8GenLabel.textContent = '草稿生成完成 ✓';
+      p8Regen.disabled = false;
+
+      p8Outline.style.display = 'block';
+      p8OutlineItems.innerHTML = DRAFT_OUTLINE.map(n =>
+        `<div class="p8-outline-node">${n}</div>`).join('');
+
+      // typewriter effect for draft
+      let i = 0;
+      const fullText = DRAFT_TEXT;
+      p8Editor.value = '';
+      const typeIv = setInterval(() => {
+        p8Editor.value += fullText[i++];
+        updateCharCount();
+        if (i >= fullText.length) {
+          clearInterval(typeIv);
+          p8Regen.style.display = 'inline-block';
+          generatedOnce = true;
+        }
+      }, 12);
+    }, 2800);
+  }
+
+  function updateCharCount() {
+    if (p8CharCount) p8CharCount.textContent = p8Editor.value.length + ' 字';
+  }
+
+  // Tab 切换：Markdown 草稿 / 公众号排版 / AI 配文+配图
+  const p8Tabs = document.getElementById('p8Tabs');
+  if (p8Tabs) {
+    const tabs  = p8Tabs.querySelectorAll('.p8-tab');
+    const panes = page8.querySelectorAll('.p8-pane');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      const key = tab.dataset.tab;
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panes.forEach(p => p.classList.toggle('active', p.dataset.pane === key));
+    }));
+  }
+
+  if (p8Generate) p8Generate.addEventListener('click', startGenerate);
+  if (p8Regen)    p8Regen.addEventListener('click', startGenerate);
+
+  if (p8Editor) p8Editor.addEventListener('input', updateCharCount);
+
+  if (p8Copy) p8Copy.addEventListener('click', () => {
+    navigator.clipboard.writeText(p8Editor.value).catch(() => {});
+    p8Copy.textContent = '已复制 ✓';
+    setTimeout(() => { p8Copy.textContent = '复制 Markdown'; }, 2000);
+  });
+
+  if (p8Export) p8Export.addEventListener('click', () => {
+    const blob = new Blob([p8Editor.value], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '人最大的内耗，是把运气误认为实力.md';
+    a.click();
+  });
+
+  if (p8Back)     p8Back.addEventListener('click', goToPage7fromEight);
+  if (p8ToEvolve) p8ToEvolve.addEventListener('click', () => {
+    window.open('https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit_v2&action=edit&isNew=1&type=77&createType=0&token=1674022654&lang=zh_CN&timestamp=1781989760276', '_blank');
+    goToPage9();
+  });
+
+  // ===== 第九页：Evolve =====
+  if (p9Back)    p9Back.addEventListener('click', goToPage8fromNine);
+  if (p9Restart) p9Restart.addEventListener('click', () => {
+    page9.classList.remove('visible');
+    setTimeout(() => { page7.classList.add('visible'); }, 300);
+  });
+
+  // 第九页：手动回流数据 → 同步到上方数据看板
+  const p9DataApply = document.getElementById('p9DataApply');
+  if (p9DataApply) {
+    const inReads = document.getElementById('p9InReads');
+    const inLikes = document.getElementById('p9InLikes');
+    const inInter = document.getElementById('p9InInter');
+    const kpiReads = document.getElementById('p9KpiReads');
+    const kpiEngage = document.getElementById('p9KpiEngage');
+    const kpiReadsDelta = document.getElementById('p9KpiReadsDelta');
+    const kpiEngageDelta = document.getElementById('p9KpiEngageDelta');
+
+    // 把某个看板数字从当前值平滑累加 delta
+    const bumpKpi = (el, delta) => {
+      if (!el || !delta) return;
+      const from = parseInt(el.textContent.replace(/[^\d]/g, ''), 10) || 0;
+      const to = from + delta;
+      el.dataset.count = to;                 // 保持与入场动画一致
+      const dur = 900, t0 = performance.now();
+      el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+      (function step(t){
+        const k = Math.min(1, (t - t0) / dur);
+        el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step); else el.textContent = to;
+      })(performance.now());
+    };
+
+    p9DataApply.addEventListener('click', () => {
+      const reads = Math.max(0, parseInt(inReads.value, 10) || 0);
+      const likes = Math.max(0, parseInt(inLikes.value, 10) || 0);
+      const inter = Math.max(0, parseInt(inInter.value, 10) || 0);
+      if (reads + likes + inter === 0) return;
+
+      // 阅读 → 累计阅读；点赞 + 互动 → 互动总量
+      bumpKpi(kpiReads, reads);
+      bumpKpi(kpiEngage, likes + inter);
+
+      if (reads && kpiReadsDelta) kpiReadsDelta.textContent = '↑ ' + reads + ' 刚刚回流';
+      if ((likes + inter) && kpiEngageDelta) kpiEngageDelta.textContent = '赞 +' + likes + ' · 互动 +' + inter;
+
+      inReads.value = inLikes.value = inInter.value = '';
+      p9DataApply.textContent = '已同步 ✓';
+      p9DataApply.classList.add('done');
+      setTimeout(() => { p9DataApply.textContent = '同步到看板'; p9DataApply.classList.remove('done'); }, 1600);
+    });
+
+    // 回车直接提交
+    [inReads, inLikes, inInter].forEach(inp => inp && inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); p9DataApply.click(); }
+    }));
+  }
+
+  // 第九页：IP 本人手记（文本 + 语音输入）
+  const p9NoteText = document.getElementById('p9NoteText');
+  if (p9NoteText) {
+    const p9NoteMic = document.getElementById('p9NoteMic');
+    const p9NoteSave = document.getElementById('p9NoteSave');
+    const p9NoteStatus = document.getElementById('p9NoteStatus');
+
+    if (p9NoteSave) p9NoteSave.addEventListener('click', () => {
+      if (!p9NoteText.value.trim()) { p9NoteText.focus(); return; }
+      p9NoteSave.textContent = '已同步给 Agent ✓';
+      p9NoteSave.classList.add('done');
+      setTimeout(() => { p9NoteSave.textContent = '同步给 Agent'; p9NoteSave.classList.remove('done'); }, 1700);
+    });
+
+    // 语音输入：Web Speech API，实时转写追加到文本框
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR && p9NoteMic) {
+      const rec = new SR();
+      rec.lang = 'zh-CN';
+      rec.interimResults = true;
+      rec.continuous = true;
+      let recording = false, baseText = '';
+      rec.onresult = (e) => {
+        let interim = '', final = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const r = e.results[i];
+          if (r.isFinal) final += r[0].transcript; else interim += r[0].transcript;
+        }
+        if (final) baseText += final;
+        p9NoteText.value = (baseText + interim);
+      };
+      rec.onerror = (e) => {
+        recording = false;
+        p9NoteMic.classList.remove('rec');
+        if (p9NoteStatus) {
+          p9NoteStatus.classList.remove('rec');
+          p9NoteStatus.textContent = e.error === 'not-allowed' ? '麦克风权限被拒绝，请在浏览器中允许' : '';
+        }
+      };
+      rec.onend = () => { if (recording) { try { rec.start(); } catch (_) {} } };
+      p9NoteMic.addEventListener('click', () => {
+        if (recording) {
+          recording = false; rec.stop();
+          p9NoteMic.classList.remove('rec');
+          if (p9NoteStatus) { p9NoteStatus.textContent = ''; p9NoteStatus.classList.remove('rec'); }
+        } else {
+          recording = true;
+          baseText = p9NoteText.value ? p9NoteText.value.replace(/\s*$/, '') + ' ' : '';
+          try { rec.start(); } catch (_) {}
+          p9NoteMic.classList.add('rec');
+          if (p9NoteStatus) { p9NoteStatus.textContent = '● 正在聆听… 再次点击麦克风结束'; p9NoteStatus.classList.add('rec'); }
+          p9NoteText.focus();
+        }
+      });
+    } else if (p9NoteMic) {
+      p9NoteMic.addEventListener('click', () => {
+        if (p9NoteStatus) p9NoteStatus.textContent = '当前浏览器不支持语音输入，请直接输入文字';
+      });
+    }
+  }
+
+  // page6 分析完成后展示引导（在 p6Analyze 点击后 2200ms 触发，此处用 MutationObserver 监听 revealed class）
+  if (p6Profile && p6GuideBar) {
+    new MutationObserver(() => {
+      if (p6Profile.classList.contains('revealed')) {
+        setTimeout(() => p6GuideBar.classList.add('show'), 600);
+      }
+    }).observe(p6Profile, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  document.querySelector('.scroll-hint').style.cursor = 'pointer';
+
+  // 缓动循环：ring 与 glow 平滑跟随
+  (function loop() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
+
+    gx += (mx - gx) * 0.06;
+    gy += (my - gy) * 0.06;
+    glow.style.transform = `translate(${gx}px, ${gy}px)`;
+
+    requestAnimationFrame(loop);
+  })();
+
+  // ===== 顶部全局导航 + 第九页动画 =====
+  const demoNav = document.getElementById('demoNav');
+  const topnavLinks = document.querySelectorAll('.topnav [data-nav]');
+  function setDemoActive(n) {
+    if (demoNav) demoNav.querySelectorAll('button').forEach(b => b.classList.toggle('active', +b.dataset.go === n));
+  }
+  // 顶部导航高亮（HOME=1 / ONBOARDING=2~6 / TOPIC=7 / STUDIO=8 / EVOLVE=9）
+  function setTopnavActive(n) {
+    const group = n >= 2 && n <= 6 ? 2 : n;
+    document.querySelectorAll('.topnav .nav-pill a').forEach(a =>
+      a.classList.toggle('active', +a.dataset.nav === group));
+  }
+  function hideAllPages() {
+    [page2, page3, page4, page5, page6, page7, page8, page9].forEach(p => p && p.classList.remove('visible'));
+  }
+  function demoGoto(n) {
+    hideAllPages();
+    if (n === 1) {
+      hero.style.display = ''; hero.style.opacity = '1'; hero.style.pointerEvents = 'auto';
+    } else {
+      hero.style.display = 'none';
+      const map = {2:page2,3:page3,4:page4,5:page5,6:page6,7:page7,8:page8,9:page9};
+      if (map[n]) map[n].classList.add('visible');
+      if (n === 9) setTimeout(animateP9, 240);
+    }
+    setDemoActive(n);
+    setTopnavActive(n);
+    if (typeof ambientScope === 'function') ambientScope(n === 1);
+    window.scrollTo(0, 0);
+  }
+  if (demoNav) demoNav.querySelectorAll('button').forEach(b =>
+    b.addEventListener('click', () => demoGoto(+b.dataset.go)));
+  // 顶部导航点击路由
+  topnavLinks.forEach(el => el.addEventListener('click', (e) => {
+    e.preventDefault();
+    demoGoto(+el.dataset.nav);
+  }));
+
+  function countUp(el) {
+    const target = +el.dataset.count, dur = 1200, t0 = performance.now();
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / dur);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(step); else el.textContent = target;
+    })(performance.now());
+  }
+  function animateP9() {
+    if (!page9) return;
+    page9.classList.add('p9-runner');
+    const arc = page9.querySelector('.p9-evo-arc');
+    if (arc) arc.style.strokeDashoffset = arc.dataset.off;
+    page9.querySelectorAll('.p9-bc-bar').forEach(b => { b.style.width = b.dataset.w; });
+    page9.querySelectorAll('[data-count]').forEach(countUp);
+  }
+
+  // 初始化选题列表（确保卡片在任何入口都存在）
+  if (p7TopicList) buildTopics();
+
+  // ===== 引导页环境音（白噪音 · Web Audio 实时生成，无需音频文件）=====
+  (function ambientSound() {
+    const toggle = document.getElementById('soundToggle');
+    const label  = document.getElementById('soundLabel');
+    if (!toggle) return;
+
+    let ctx = null, master = null, ambientOn = false;
+    const VOL = 0.06;
+
+    function build() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      ctx = new AC();
+      // 2.5s 循环噪音缓冲：白噪音积分为柔和的"棕噪/星海风"质感
+      const sr = ctx.sampleRate, len = Math.floor(2.5 * sr);
+      const buf = ctx.createBuffer(1, len, sr);
+      const d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        d[i] = last * 3.2;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      // 低通滤掉刺耳高频
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.6;
+      // 缓慢"呼吸"LFO，给噪音一点起伏，增强沉浸感
+      const breath = ctx.createGain(); breath.gain.value = 1;
+      const lfo = ctx.createOscillator(); lfo.frequency.value = 0.08;
+      const lfoAmt = ctx.createGain(); lfoAmt.gain.value = 0.2;
+      lfo.connect(lfoAmt).connect(breath.gain);
+      // 极低频暖垫，增加空间纵深
+      const drone = ctx.createOscillator(); drone.type = 'sine'; drone.frequency.value = 57;
+      const droneGain = ctx.createGain(); droneGain.gain.value = 0.015;
+      master = ctx.createGain(); master.gain.value = 0;
+      src.connect(lp).connect(breath).connect(master);
+      drone.connect(droneGain).connect(master);
+      master.connect(ctx.destination);
+      lfo.start(); drone.start(); src.start();
+      return true;
+    }
+
+    function fade(target) {
+      if (!ctx) return;
+      const g = master.gain, t = ctx.currentTime;
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(g.value, t);
+      g.linearRampToValueAtTime(target, t + (target > g.value ? 2.4 : 1.2));
+    }
+    // 声音覆盖范围：封面 → 认识你 → 人格问卷 → 开放问答（page1~page4）；进入人格画像(page5)起淡出
+    function isVisible(id) { const el = document.getElementById(id); return el && el.classList.contains('visible'); }
+    function inZone() {
+      if (isVisible('page2') || isVisible('page3') || isVisible('page4')) return true;       // 认识你 / 问卷 / 问答
+      if (isVisible('page5') || isVisible('page6') || isVisible('page7') ||
+          isVisible('page8') || isVisible('page9')) return false;                            // 画像之后
+      const h = document.getElementById('hero');
+      return !h || getComputedStyle(h).display !== 'none';                                    // 都不可见 → 封面
+    }
+    function targetVol() { return (ambientOn && inZone()) ? VOL : 0; }
+
+    function refresh() {
+      const zone = inZone();
+      toggle.classList.toggle('show', zone);          // 仅在声音覆盖区显示开关
+      if (ctx && ctx.state === 'suspended' && ambientOn && zone) ctx.resume();
+      fade(targetVol());
+    }
+
+    function setOn(on) {
+      ambientOn = on;
+      if (on && !ctx) { if (!build()) return; }
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+      toggle.classList.toggle('playing', on);
+      toggle.classList.toggle('hint', !on);
+      if (label) label.textContent = on ? '声音 · 开' : '声音 · 关';
+      fade(targetVol());
+    }
+
+    // 兼容页面切换钩子（goToPage1/2、demoGoto 调用）
+    window.ambientScope = function () { refresh(); };
+
+    // 自动跟踪所有页面切换（class / display 变化）→ 实时更新声音与开关
+    const watch = ['page2','page3','page4','page5','page6','page7','page8','page9']
+      .map(id => document.getElementById(id)).filter(Boolean);
+    const mo = new MutationObserver(() => refresh());
+    watch.forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class'] }));
+    const heroEl = document.getElementById('hero');
+    if (heroEl) mo.observe(heroEl, { attributes: true, attributeFilter: ['style'] });
+
+    toggle.addEventListener('click', (e) => { e.preventDefault(); setOn(!ambientOn); });
+
+    // 首次交互自动柔和淡入（点声音开关由其自身处理）
+    function autoStart(e) {
+      if (ambientOn) { teardown(); return; }
+      if (e.target && e.target.closest && e.target.closest('#soundToggle')) return;
+      setOn(true);
+      teardown();
+    }
+    function teardown() {
+      window.removeEventListener('pointerdown', autoStart);
+      window.removeEventListener('keydown', autoStart);
+      window.removeEventListener('touchstart', autoStart);
+    }
+    window.addEventListener('pointerdown', autoStart);
+    window.addEventListener('keydown', autoStart);
+    window.addEventListener('touchstart', autoStart);
+
+    refresh();  // 初始：封面显示开关
+  })();
+</script>
+</body>
+</html>
