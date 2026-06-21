@@ -2500,17 +2500,17 @@
       <div class="ob-row">
         <div class="ob-field">
           <label class="ob-label">你的名字</label>
-          <input class="ob-input" type="text" placeholder="你希望我怎么称呼你？" />
+          <input class="ob-input" type="text" placeholder="你希望我怎么称呼你？" value="小鱼" />
         </div>
         <div class="ob-field">
           <label class="ob-label">你的身份 / 行业</label>
           <select class="ob-select">
-            <option value="" disabled selected>选择你的领域</option>
+            <option value="" disabled>选择你的领域</option>
             <option>创作者 / 博主</option>
             <option>品牌 / 企业</option>
             <option>电商 / 零售</option>
             <option>科技 / SaaS</option>
-            <option>教育 / 知识付费</option>
+            <option selected>教育 / 知识付费</option>
             <option>金融 / 投资</option>
             <option>媒体 / 公关</option>
             <option>其他</option>
@@ -2521,20 +2521,20 @@
       <div class="ob-field">
         <label class="ob-label">主要内容平台</label>
         <select class="ob-select">
-          <option value="" disabled selected>你主要活跃在哪里？</option>
+          <option value="" disabled>你主要活跃在哪里？</option>
           <option>小红书</option>
           <option>抖音 / TikTok</option>
           <option>微信公众号</option>
           <option>B站 / YouTube</option>
           <option>微博 / Twitter · X</option>
           <option>LinkedIn</option>
-          <option>多平台运营</option>
+          <option selected>多平台运营</option>
         </select>
       </div>
 
       <div class="ob-field">
         <label class="ob-label">你的 IP 定位 · 你在创作什么？</label>
-        <textarea class="ob-textarea" placeholder="例如：我是一个分享职场成长与效率工具的博主，受众是 25–35 岁的职场新人…"></textarea>
+        <textarea class="ob-textarea">高校老师 + 在读博士，同时是播客创作者和小红书 IP 探索者。内容方向是女性自我认知与成长：聊野心与迷失、合作关系与自悟、人生节点与重新出发。写给那些有想法、有摩擦、还在找自己的都市女性。</textarea>
       </div>
 
       <div class="ob-actions">
@@ -2736,7 +2736,8 @@
   const qNext    = document.getElementById('quizNext');
 
   let quizIdx = 0;
-  const answers = new Array(QUIZ.length).fill(null);
+  // 预填答案（基于真实履历）：写给自我迭代的奋斗者 / 真诚个人表达 / 转折与醒悟 / 短句直白 / 核心观点明确 / IP与职业身份分开
+  const answers = [1, 0, 0, 0, 0, 2];
 
   function renderQuiz() {
     const total = QUIZ.length;
@@ -2829,7 +2830,11 @@
   const openDots   = document.getElementById('openDots');
 
   let openIdx = 0;
-  const openAnswers = new Array(OPEN_QS.length).fill('');
+  const openAnswers = [
+    '我和播客搭档有过一次很大的矛盾。年初我们想商业化，节奏拉得很快，剪辑、录制、小红书推流全压在我们各自身上，但始终没有正反馈。四月我身体出了问题想歇一歇，他不理解我为什么突然停。更深层的是——我们越来越聊不到一块了。他接不住我在讲的那些东西，总在想下一步说什么，而不是真正在听我说的当下。那种时刻很孤独。我没好意思承认的情绪是：我一度以为是自己太难相处了，但其实我只是走得比他快了一点。',
+    '从小县城长大，父母重视教育，初中就带我走遍欧洲十几个国家，从小有一种"我和别人不一样"的感觉。初中被严厉班主任压着，性格极度内向；高中终于没人管了，开始打扮、追关注、没好好学习，进了普通大学。大二逆袭：坐第一排、和老师搞好关系、绩点年级第一，如愿拿到 UCL Offer。但到了 UCL 又懈怠——我有个惯性：拼命追目标，达成之后就茫然了。回国本有大厂 Offer，为了有自由时间做自己真正想做的事，最终选了体制内，成为高校老师、同时读博。2024 年 AI 创业，产品拿了不少奖、世界人工智能大会展出，但和合伙人产生分歧，没走下去。同年和朋友一起做播客，三千多粉丝，还在路上。',
+    '最近一直在想「人不靠改变，靠自悟」。你没法真正改变别人——创业伙伴、播客搭档都是如此。他们听不懂的那些话，等他们自己经历了某个节点，才会忽然 get 到。我也发现了另一件事：只要真的落子去做，焦虑就消失了，身体都不会有紧张感；停在空想里，活该焦虑。我常常对自己说的一句话是：「一定要去落子，一定要去落地。你如果不落子，只停留在空想，那你活该焦虑。」',
+  ];
 
   function renderOpen() {
     const total = OPEN_QS.length;
