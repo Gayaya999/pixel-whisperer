@@ -16,6 +16,7 @@
     --accent-glow: #f5a623;
     --text-hi: #ffffff;
     --text-low: #8093b0;
+    --studio-outline-width: 340px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1142,8 +1143,8 @@
   .p8-backlink:hover { color:#fff; }
 
   /* —— 三栏工作台 —— */
-  .p8-board { display:grid; grid-template-columns:248px 1fr; gap:18px; align-items:stretch; flex:1; }
-  @media(max-width:980px){ .p8-board{grid-template-columns:1fr} }
+  .p8-board { display:grid; grid-template-columns:var(--studio-outline-width) minmax(0,1fr); gap:18px; align-items:stretch; flex:1; }
+  @media(max-width:980px){ .p8-board{grid-template-columns:minmax(0,1fr)} }
 
   .p8-panel { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); border-radius:20px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 24px 60px -22px rgba(0,0,0,.55); }
   .p8-panel-h { font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:rgba(128,147,176,.7); font-weight:700; }
